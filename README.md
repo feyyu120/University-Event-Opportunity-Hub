@@ -1,34 +1,85 @@
 # Team Project
 
-## Setup Instructions
+## 📥 Setup Instructions
 
-1. Clone the repo:
-   git clone https://github.com/feyyu120/University-Event-Opportunity-Hub.git
+### 1. Clone the repository
 
-2.cd into the project directory:
+```bash
+git clone https://github.com/feyyu120/University-Event-Opportunity-Hub.git
+```
+
+### 2. Go into the project directory
+
+```bash
 cd University-Event-Opportunity-Hub
+```
 
-3. Create your branch:
-   git checkout -b your-feature-name
+### 3. Create your own branch
 
-4. Go to your folder:
+```bash
+git checkout -b your-feature-name
+```
 
-- admin → React
-- mobile → React Native
-- backend → PHP
+---
 
-5. Install dependencies:
-   example for react: npm install
+## 📁 Project Structure
 
-6. Start project:
-   example for react: npm start
+- `admin/` → React (Admin Panel)
+- `mobile/` → React Native (Mobile App)
+- `backend/` → PHP (API & Server)
 
-## Rules
+---
 
-- Do not push to main
-- Always use branches
-- Pull before working
+## ⚙️ Setup Your Part(as you work on it)
 
-### You can delete .gitkeep files after you add your files to the folder you are working on.
+### 👉 For React (admin)
 
--
+```bash
+cd admin
+npm install
+npm start
+```
+
+### 👉 For React Native (mobile)
+
+```bash
+cd mobile
+npm install
+npx expo start
+```
+
+### 👉 For PHP (backend)
+
+- Use XAMPP / Laragon / WAMP
+- Place project in server directory (e.g. `htdocs`)
+- Start Apache & MySQL
+
+---
+
+## 🔄 Workflow Rules
+
+- ❌ Do NOT push directly to `main`
+- ✅ Always create your own branch
+- ✅ Always pull latest changes before working:
+
+```bash
+git pull origin main
+```
+
+- ✅ Commit your changes clearly:
+
+```bash
+git add .
+git commit -m "your message"
+git push
+```
+
+---
+
+## 📌 Notes
+
+- You can delete `.gitkeep` files after adding real project files to your folder.
+- Keep your code organized inside your assigned folder.
+- Write clear commit messages.
+
+---
