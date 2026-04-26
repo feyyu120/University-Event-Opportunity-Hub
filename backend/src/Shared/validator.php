@@ -7,6 +7,9 @@ class Validator {
         
         return in_array($domain, $allowedDomains);
     }
+    public static function ischeckedUserId($user_id) { 
+        return !preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $user_id);
+    }
 }
 
 ?>

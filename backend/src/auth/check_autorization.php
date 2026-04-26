@@ -4,11 +4,11 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST");
 
 require_once __DIR__ . '/../Shared/db.php';
- 
+require_once __DIR__ . '/../Shared/validator.php';
 
 $json = file_get_contents('php://input');
 $data = json_decode($json, true); 
-if (empty($data['user_id']) || empty($data['role']) || !preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $data['user_id'])){
+if (empty($data['user_id']) || empty($data['role']) || Validator::ischeckedUserId($data['user_id'])){
     http_response_code(400);
     echo json_encode([
         "authorized" => false,
