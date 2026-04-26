@@ -1,7 +1,7 @@
 <?php
 header("Content-Type: application/json");
-require_once __DIR__ . '/../Shared/db.php';
- 
+
+// require_once __DIR__ . '/../Shared/db.php';
 
 $data = json_decode(file_get_contents('php://input'), true);
 $user_id = $data['user_id'] ?? null;
@@ -12,9 +12,9 @@ if (!$user_id) {
     exit;
 }
 
-$pdo = get_db_connection();
 
-try { 
+try {
+    $pdo = get_db_connection();
     $stmt = $pdo->prepare("UPDATE users SET is_active = FALSE, last_active_at = NOW() WHERE id = ?");
     $stmt->execute([$user_id]);
 
@@ -26,3 +26,5 @@ try {
     http_response_code(500);
     echo json_encode(["error" => $e->getMessage()]);
 }
+
+?>
