@@ -1,7 +1,7 @@
 <?php
 header("Content-Type: application/json");
 
-// require_once __DIR__ . '/../Shared/db.php';
+require_once __DIR__ . '/../Shared/db.php';
 
 $data = json_decode(file_get_contents('php://input'), true);
 $user_id = $data['user_id'] ?? null;

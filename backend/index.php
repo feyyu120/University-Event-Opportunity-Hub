@@ -34,9 +34,9 @@ switch ($route) {
         break;
     
     case 'auth/logout':
-        require __DIR__ . 'src/auth/logout.php';
+        require __DIR__ . '/src/auth/logout.php';
         break;
-        
+
             // i will work with those cases next
     // case 'opportunities': 
     //     require __DIR__ . '/opportunities/list.php';
