@@ -1,5 +1,5 @@
-## folder structure
-
+# folder structure
+```
 astu_event_center-backend/
 ├── src/
 │   ├── Auth/           # Registration, Login, OTP logic
@@ -8,17 +8,17 @@ astu_event_center-backend/
 ├── public/
 │   └── index.php       # The main entry point for Render
 ├── Dockerfile          # For Render deployment
-├── composer.json       # If you use libraries (optional but recommended)
-└── .env                # Local secrets (NEVER commit this to GitHub)
+├── composer.json       # If you use libraries  
+```
+---
 
+## this is the api endpoint structure 
 
-this is the api endpoint structure 
-
-## register (sign in )
+## register sign in
 https://astu-event-center-backend.onrender.com/auth/register
 
 And it accepts data with POST method like this and in
-json'''
+```json
  {
   "full_name": "Abuki ",
   "email": "test@aau.edu.et",
@@ -28,14 +28,50 @@ json'''
 }
 ```
 ---
-## next login  
+## login  
 https://astu-event-center-backend.onrender.com/auth/login
 
 it also accepts data with POST method likethis
-json```
+```json
  { 
   "email": "test@aau.edu.et",
   "password": "mypassword123",
  }
  ```
- 
+
+and the response will be 
+```json
+{
+    "message": "Login successful",
+    "user": {
+        "id": "8ace104e-8528-4f22-a952-00ae3576f4b0",
+        "full_name": "Abuki Developer",
+        "email": "test@aau.edu.et",
+        "role": "student",
+        "university": "Addis Ababa University",
+        "department": "Software Engineering",
+        "year": "3rd Year"
+    }
+}
+```
+---
+## Autorization
+https://astu-event-center-backend.onrender.com/auth/autorize
+
+it accepts user_id and role like this 
+ ```json
+ { 
+  "user_id": "8ace104e-8528-4f22-a952-00ae3576f4b0",
+  "role": "student"
+ }
+ ```
+ and the response will be 
+ ```json
+ {
+    "authorized": true,
+    "message": "User has the required permissions",
+    "current_role": "student"
+}
+``` 
+---
+
