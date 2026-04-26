@@ -58,7 +58,7 @@ and the response will be
 ## Autorization
 https://astu-event-center-backend.onrender.com/auth/autorize
 
-it accepts user_id and role like this 
+it accepts user_id and role like this with POST method
  ```json
  { 
   "user_id": "8ace104e-8528-4f22-a952-00ae3576f4b0",
@@ -73,5 +73,21 @@ it accepts user_id and role like this
     "current_role": "student"
 }
 ``` 
+---
+## logout 
+it accepts user id In POST method like this 
+```json
+{
+    "user_id" : "0ce732b3-bf37-406b-b983-2c09b8dbb183", 
+}
+```
+and returns this 
+
+```json
+{
+    "success": true,
+    "message": "Logged out successfully. Account status set to inactive."
+}
+```
 ---
 
