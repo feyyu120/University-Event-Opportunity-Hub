@@ -2,10 +2,11 @@
 header("Content-Type: application/json");
 
 require_once __DIR__ . '/../src/Shared/db.php';
- 
-$user_id = $_GET['user_id'] ?? null;
+require_once __DIR__ . '/../src/Shared/validator.php';
 
-if (!$user_id) {
+$user_id = $_GET['user_id'] ?? null; 
+
+if (!$user_id || Validator::isUniversityEmail($user_id)) {
     http_response_code(400);
     echo json_encode([
         'authorized'=> false,

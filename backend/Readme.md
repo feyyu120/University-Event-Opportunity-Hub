@@ -15,8 +15,10 @@ astu_event_center-backend/
 ## this is the api endpoint structure 
 
 ## register sign in
+```
 https://astu-event-center-backend.onrender.com/auth/register
 
+```
 And it accepts data with POST method like this and in
 ```json
  {
@@ -29,9 +31,12 @@ And it accepts data with POST method like this and in
 ```
 ---
 ## login  
+```
 https://astu-event-center-backend.onrender.com/auth/login
 
-it also accepts data with POST method likethis
+```
+
+it accepts data with POST method likethis
 ```json
  { 
   "email": "test@aau.edu.et",
@@ -56,7 +61,10 @@ and the response will be
 ```
 ---
 ## Autorization
+
+```url
 https://astu-event-center-backend.onrender.com/auth/autorize
+```
 
 it accepts user_id and role like this with POST method
  ```json
@@ -75,7 +83,13 @@ it accepts user_id and role like this with POST method
 ``` 
 ---
 ## logout 
+```url
+https://astu-event-center-backend.onrender.com/auth/logout
+
+```
+
 it accepts user id In POST method like this 
+
 ```json
 {
     "user_id" : "0ce732b3-bf37-406b-b983-2c09b8dbb183", 
@@ -90,4 +104,35 @@ and returns this
 }
 ```
 ---
+
+## profile (me)
+
+the app sends user_id in GET method like this 
+
+```
+https://astu-event-center-backend.onrender.com/users/me?user_id=0ce732b3-bf37-406b-b983-2c09b8dbb183
+
+```
+and the response will be
+
+```json
+{
+    "authorized": true,
+    "data": {
+        "id": "0ce732b3-bf37-406b-b983-2c09b8dbb183",
+        "email": "test@aau.edu.et",
+        "full_name": "Abuki ",
+        "department": "Software Engineering",
+        "year": "3rd Year",
+        "role": "student",
+        "interests": null,
+        "goals": null,
+        "is_active": true,
+        "created_at": "2026-04-26 00:05:46.329996",
+        "university_name": "Addis Ababa University"
+    }
+}
+```
+
+
 
