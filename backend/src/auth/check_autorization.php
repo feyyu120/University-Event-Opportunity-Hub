@@ -8,18 +8,19 @@ require_once __DIR__ . '/../Shared/db.php';
 
 $json = file_get_contents('php://input');
 $data = json_decode($json, true); 
-if (empty($data['user_id']) || empty($data['role'])) {
+if (empty($data['user_id']) || empty($data['role']) || !preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $data['user_id'])){
     http_response_code(400);
     echo json_encode([
         "authorized" => false,
-        "error" => "Missing user_id or required_role"]);
+        "error" => " invalid user_id or Missing role"]);
     exit;
 }
+
 try { 
 $user_id = $data['user_id'];
+
 $required_role = $data['role'];  
 $pdo = get_db_connection();
-
 
     $stmt = $pdo->prepare("SELECT id, role FROM users WHERE id = ?");
     $stmt->execute([$user_id]);

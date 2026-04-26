@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 }
  
 $requestUri = $_SERVER['REQUEST_URI'];
-$basePath = 'astu_event_center'; 
+$basePath = 'University-Event-Opportunity-Hub/backend'; 
  
 $route = str_replace($basePath, '', parse_url($requestUri, PHP_URL_PATH));
 $route = trim($route, '/');
@@ -29,6 +29,14 @@ switch ($route) {
     case 'auth/autorize':
             require __DIR__ . '/src/auth/check_autorization.php';
             break;
+    case 'users/me':
+        require __DIR__ . '/users/me.php';
+        break;
+    
+    case 'auth/logout':
+        require __DIR__ . 'src/auth/logout.php';
+        break;
+        
             // i will work with those cases next
     // case 'opportunities': 
     //     require __DIR__ . '/opportunities/list.php';
@@ -37,13 +45,7 @@ switch ($route) {
     // case '':
     //     echo json_encode(["status" => "online", "message" => "University Hub API Gateway"]);
     //     break;
-    case 'users/me':
-        require __DIR__ . '/users/me.php';
-        break;
-    
-    case 'auth/logout':
-        require __DIR__ . 'src/auth/logout.php';
-        break;
+
     default:
         http_response_code(404);
         echo json_encode(["error" => "Endpoint not found", "route" => $route]);
