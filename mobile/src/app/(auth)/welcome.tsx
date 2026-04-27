@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, SafeAreaView, TouchableOpacity, Modal, FlatList, useColorScheme, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
 import { Carousel, CarouselItem } from '@/components/Carousel';
 import { Spacing, Colors, Radius, Shadows } from '@/constants/theme';
@@ -10,19 +11,22 @@ const VALUE_PROPS: CarouselItem[] = [
     id: '1',
     title: 'Discover Events',
     description: 'Find networking events, workshops, and seminars happening at your university.',
-    icon: '🎉',
+    icon: 'sparkles',
+    iconColor: '#8B5CF6',
   },
   {
     id: '2',
     title: 'Scholarships',
     description: 'Never miss a deadline. Get notified about scholarships that match your profile.',
-    icon: '🎓',
+    icon: 'school',
+    iconColor: '#10B981',
   },
   {
     id: '3',
     title: 'Internships',
     description: 'Connect with industry leaders and land your dream internship or part-time job.',
-    icon: '💼',
+    icon: 'briefcase',
+    iconColor: '#6366F1',
   },
 ];
 
@@ -60,7 +64,7 @@ export default function WelcomeScreen() {
             onPress={() => setIsModalVisible(true)}
           >
             <ThemedText style={styles.uniText}>{selectedUniversity}</ThemedText>
-            <ThemedText style={{ opacity: 0.5 }}>▼</ThemedText>
+            <Ionicons name="chevron-down" size={18} color={colors.textSecondary} />
           </TouchableOpacity>
 
           <View style={styles.buttonGroup}>
@@ -86,7 +90,7 @@ export default function WelcomeScreen() {
               <View style={styles.modalHeader}>
                 <ThemedText type="subtitle">Select University</ThemedText>
                 <TouchableOpacity onPress={() => setIsModalVisible(false)} style={styles.closeCircle}>
-                  <ThemedText style={{ fontSize: 18 }}>✕</ThemedText>
+                  <Ionicons name="close" size={18} color={colors.text} />
                 </TouchableOpacity>
               </View>
               <FlatList
@@ -100,7 +104,7 @@ export default function WelcomeScreen() {
                     }}
                   >
                     <ThemedText style={styles.uniItemText}>{item}</ThemedText>
-                    {item === selectedUniversity && <ThemedText style={{ color: colors.primary }}>✓</ThemedText>}
+                    {item === selectedUniversity && <Ionicons name="checkmark" size={20} color={colors.primary} />}
                   </TouchableOpacity>
                 )}
                 keyExtractor={(item) => item}

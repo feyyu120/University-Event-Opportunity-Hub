@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText } from './Themed';
 import { Spacing, Colors } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
@@ -7,7 +8,7 @@ import { useColorScheme } from 'react-native';
 export interface Interest {
   id: string;
   name: string;
-  icon: string;
+  icon: keyof typeof Ionicons.glyphMap;
   category: string;
 }
 
@@ -44,9 +45,16 @@ export function InterestChips({ interests, selectedIds, onToggle }: InterestChip
                   ]}
                   onPress={() => onToggle(interest.id)}
                 >
-                  <ThemedText style={[styles.chipText, isSelected && { color: '#FFF' }]}>
-                    {interest.icon} {interest.name}
-                  </ThemedText>
+                  <View style={styles.chipContent}>
+                    <Ionicons 
+                      name={interest.icon} 
+                      size={16} 
+                      color={isSelected ? '#FFF' : colors.text} 
+                    />
+                    <ThemedText style={[styles.chipText, isSelected && { color: '#FFF' }]}>
+                      {interest.name}
+                    </ThemedText>
+                  </View>
                 </TouchableOpacity>
               );
             })}
@@ -81,6 +89,11 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
     borderRadius: 20,
     borderWidth: 1,
+  },
+  chipContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   chipText: {
     fontSize: 14,

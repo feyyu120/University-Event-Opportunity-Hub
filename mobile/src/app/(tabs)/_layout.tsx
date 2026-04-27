@@ -2,9 +2,9 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { StyleSheet, useColorScheme, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Shadows } from '@/constants/theme';
 import { haptic } from '@/utils/hapticHelper';
-import { ThemedText } from '@/components/Themed';
 
 export default function TabLayout() {
   const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
@@ -18,10 +18,10 @@ export default function TabLayout() {
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: styles.tabBar,
         tabBarBackground: () => (
-          <BlurView 
-            intensity={theme === 'dark' ? 60 : 80} 
-            tint={theme === 'dark' ? 'dark' : 'light'} 
-            style={StyleSheet.absoluteFill} 
+          <BlurView
+            intensity={theme === 'dark' ? 60 : 80}
+            tint={theme === 'dark' ? 'dark' : 'light'}
+            style={StyleSheet.absoluteFill}
           />
         ),
         tabBarLabelStyle: styles.tabBarLabel,
@@ -35,42 +35,54 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Explore',
-          tabBarIcon: ({ color }) => <ThemedText style={{ color, fontSize: 22 }}>🏠</ThemedText>,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'compass' : 'compass-outline'} size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="search"
         options={{
           title: 'Search',
-          tabBarIcon: ({ color }) => <ThemedText style={{ color, fontSize: 22 }}>🔍</ThemedText>,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'search' : 'search-outline'} size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="saved"
         options={{
           title: 'Saved',
-          tabBarIcon: ({ color }) => <ThemedText style={{ color, fontSize: 22 }}>🔖</ThemedText>,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'bookmark' : 'bookmark-outline'} size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="applications"
         options={{
           title: 'Applied',
-          tabBarIcon: ({ color }) => <ThemedText style={{ color, fontSize: 22 }}>💼</ThemedText>,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'briefcase' : 'briefcase-outline'} size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="notifications"
         options={{
           title: 'Inbox',
-          tabBarIcon: ({ color }) => <ThemedText style={{ color, fontSize: 22 }}>🔔</ThemedText>,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'notifications' : 'notifications-outline'} size={24} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => <ThemedText style={{ color, fontSize: 22 }}>👤</ThemedText>,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
+          ),
         }}
       />
     </Tabs>
@@ -79,23 +91,12 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    position: 'absolute',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.05)',
-    height: Platform.OS === 'ios' ? 88 : 70,
-    paddingBottom: Platform.OS === 'ios' ? 30 : 12,
-    paddingTop: 12,
-    elevation: 0,
-    backgroundColor: 'transparent',
+
   },
   tabBarLabel: {
-    fontSize: 10,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginTop: 4,
+
   },
   tabBarIcon: {
-    marginBottom: -2,
+
   },
 });

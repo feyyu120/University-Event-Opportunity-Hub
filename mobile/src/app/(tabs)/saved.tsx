@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, FlatList, TouchableOpacity, SafeAreaView, useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from '@/components/Themed';
 import { OpportunityCard, Opportunity } from '@/components/OpportunityCard';
 import { Spacing, Colors, Radius, Shadows } from '@/constants/theme';
@@ -69,7 +70,7 @@ export default function SavedScreen() {
           />
         ) : (
           <View style={styles.emptyState}>
-            <ThemedText style={{ fontSize: 64, marginBottom: 16 }}>🔖</ThemedText>
+            <Ionicons name="bookmark-outline" size={64} color={colors.textSecondary} style={{ marginBottom: 16 }} />
             <ThemedText type="subtitle">No saved items</ThemedText>
             <ThemedText style={styles.emptySub}>Your bookmarked opportunities will appear here.</ThemedText>
             <TouchableOpacity style={[styles.browseBtn, { backgroundColor: colors.text }]} onPress={() => router.push('/(tabs)')}>

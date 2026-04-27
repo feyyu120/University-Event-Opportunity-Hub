@@ -1,5 +1,6 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { StyleSheet, Animated, Dimensions, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from './Themed';
 import { Spacing } from '@/constants/theme';
 
@@ -50,7 +51,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           >
             <ThemedView variant="element" style={styles.toast}>
               <View style={styles.icon}>
-                <ThemedText style={{ fontSize: 24 }}>🎯</ThemedText>
+                <Ionicons name="flash" size={22} color="#6366F1" />
               </View>
               <View style={{ flex: 1 }}>
                 <ThemedText type="defaultSemiBold" numberOfLines={1}>{currentNotif.title}</ThemedText>

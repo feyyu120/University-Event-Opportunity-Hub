@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { StyleSheet, View, TextInput, FlatList, TouchableOpacity, ActivityIndicator, SafeAreaView, useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from '@/components/Themed';
 import { OpportunityCard, Opportunity } from '@/components/OpportunityCard';
 import { Spacing, Colors, Radius, Shadows } from '@/constants/theme';
@@ -47,7 +48,7 @@ export default function SearchScreen() {
         <View style={styles.header}>
           <ThemedText type="title" style={styles.title}>Search</ThemedText>
           <View style={[styles.searchBox, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-            <ThemedText style={{ fontSize: 18, marginRight: 8 }}>🔍</ThemedText>
+            <Ionicons name="search-outline" size={20} color={colors.textSecondary} style={{ marginRight: 8 }} />
             <TextInput
               style={[styles.input, { color: colors.text }]}
               placeholder="Search opportunities..."
@@ -58,7 +59,7 @@ export default function SearchScreen() {
             />
             {query.length > 0 && (
               <TouchableOpacity onPress={() => handleSearch('')}>
-                <ThemedText style={{ opacity: 0.5 }}>✕</ThemedText>
+                <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
               </TouchableOpacity>
             )}
           </View>
@@ -107,7 +108,7 @@ export default function SearchScreen() {
               />
             ) : (
               <View style={styles.center}>
-                <ThemedText style={{ fontSize: 40, marginBottom: 16 }}>🔎</ThemedText>
+                <Ionicons name="search" size={48} color={colors.textSecondary} style={{ marginBottom: 16 }} />
                 <ThemedText type="subtitle">No matches found</ThemedText>
                 <ThemedText style={styles.noResultsSub}>Try adjusting your keywords or filters.</ThemedText>
               </View>

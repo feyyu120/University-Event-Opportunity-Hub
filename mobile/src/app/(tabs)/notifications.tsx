@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, FlatList, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from '@/components/Themed';
 import { Spacing, Colors } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
@@ -20,19 +21,19 @@ const MOCK_NOTIFS: Notification[] = [
   { id: '3', type: 'New Match', title: 'New Opportunity', body: 'A new AI Internship was posted that matches your interests.', time: '1d ago', isRead: true, group: 'Yesterday' },
 ];
 
+const getTypeIcon = (type: string): { name: keyof typeof Ionicons.glyphMap; color: string } => {
+  switch (type) {
+    case 'Deadline': return { name: 'hourglass-outline', color: '#F59E0B' };
+    case 'QA': return { name: 'chatbubble-outline', color: '#6366F1' };
+    case 'New Match': return { name: 'flash-outline', color: '#10B981' };
+    default: return { name: 'notifications-outline', color: '#64748B' };
+  }
+};
+
 export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFS);
   const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'Deadline': return '⏳';
-      case 'QA': return '💬';
-      case 'New Match': return '🎯';
-      default: return '🔔';
-    }
-  };
 
   const handleClear = () => {
     Alert.alert('Clear All', 'Are you sure you want to clear all notifications?', [
@@ -62,27 +63,30 @@ export default function NotificationsScreen() {
 
         <FlatList
           data={notifications}
-          renderItem={({ item }) => (
-            <TouchableOpacity style={[styles.notifCard, !item.isRead && { backgroundColor: `${colors.primary}10` }]}>
-              <View style={styles.iconContainer}>
-                <ThemedText style={{ fontSize: 24 }}>{getTypeIcon(item.type)}</ThemedText>
-              </View>
-              <View style={styles.body}>
-                <View style={styles.cardHeader}>
-                  <ThemedText type="defaultSemiBold" style={!item.isRead && { color: colors.primary }}>{item.title}</ThemedText>
-                  <ThemedText style={styles.time}>{item.time}</ThemedText>
+          renderItem={({ item }) => {
+            const iconInfo = getTypeIcon(item.type);
+            return (
+              <TouchableOpacity style={[styles.notifCard, !item.isRead && { backgroundColor: `${colors.primary}10` }]}>
+                <View style={[styles.iconContainer, { backgroundColor: iconInfo.color + '15' }]}>
+                  <Ionicons name={iconInfo.name} size={22} color={iconInfo.color} />
                 </View>
-                <ThemedText style={styles.notifBody}>{item.body}</ThemedText>
-              </View>
-              {!item.isRead && <View style={[styles.unreadDot, { backgroundColor: colors.primary }]} />}
-            </TouchableOpacity>
-          )}
+                <View style={styles.body}>
+                  <View style={styles.cardHeader}>
+                    <ThemedText type="defaultSemiBold" style={!item.isRead && { color: colors.primary }}>{item.title}</ThemedText>
+                    <ThemedText style={styles.time}>{item.time}</ThemedText>
+                  </View>
+                  <ThemedText style={styles.notifBody}>{item.body}</ThemedText>
+                </View>
+                {!item.isRead && <View style={[styles.unreadDot, { backgroundColor: colors.primary }]} />}
+              </TouchableOpacity>
+            );
+          }}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.list}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <ThemedText style={{ fontSize: 60 }}>📭</ThemedText>
-              <ThemedText type="subtitle">Inbox is empty</ThemedText>
+              <Ionicons name="mail-open-outline" size={60} color={colors.textSecondary} />
+              <ThemedText type="subtitle" style={{ marginTop: 16 }}>Inbox is empty</ThemedText>
               <ThemedText style={styles.emptySub}>We'll notify you when something important happens.</ThemedText>
             </View>
           }
@@ -124,7 +128,6 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: 'rgba(0,0,0,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },

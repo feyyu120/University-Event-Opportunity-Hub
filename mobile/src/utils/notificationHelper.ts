@@ -41,7 +41,7 @@ export async function scheduleDailyDigest(quietHours: QuietHours | null) {
   
   return await Notifications.scheduleNotificationAsync({
     content: {
-      title: 'Good morning! ☀️',
+      title: 'Good morning!',
       body: '5 new opportunities matching your interests are waiting for you.',
       data: { url: '/(tabs)' },
     },
@@ -56,7 +56,7 @@ export async function scheduleDailyDigest(quietHours: QuietHours | null) {
 export async function scheduleDeadlineReminder(title: string, dateStr: string) {
   return await Notifications.scheduleNotificationAsync({
     content: {
-      title: '⚠️ Deadline Tomorrow',
+      title: 'Deadline Tomorrow',
       body: `${title} ends in 24h. Don't forget to apply!`,
       data: { url: '/(tabs)/saved' },
     },
@@ -69,7 +69,7 @@ export async function scheduleDeadlineReminder(title: string, dateStr: string) {
 export async function scheduleStatusUpdate(title: string, status: string) {
   return await Notifications.scheduleNotificationAsync({
     content: {
-      title: status === 'Accepted' ? '✅ Congratulations!' : '🔔 Status Update',
+      title: status === 'Accepted' ? 'Congratulations!' : 'Status Update',
       body: `Your application for ${title} was marked as ${status}.`,
       data: { url: '/(tabs)/applications' },
     },

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, SafeAreaView, ScrollView, TouchableOpacity, Switch, useColorScheme, Image } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
 import { Spacing, Colors, Radius, Shadows } from '@/constants/theme';
 
@@ -23,7 +24,7 @@ export default function ProfileScreen() {
                 style={[styles.avatar, { borderColor: colors.backgroundElement }]} 
               />
               <TouchableOpacity style={[styles.editBadge, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-                <ThemedText style={{ fontSize: 12 }}>✏️</ThemedText>
+                <Ionicons name="pencil" size={14} color={colors.primary} />
               </TouchableOpacity>
             </View>
             <ThemedText type="title" style={styles.name}>Alex Johnson</ThemedText>
@@ -42,9 +43,9 @@ export default function ProfileScreen() {
           <View style={styles.body}>
             <ThemedText type="label" style={styles.sectionLabel}>ACADEMIC PROFILE</ThemedText>
             <ThemedView variant="element" style={styles.card}>
-              <ProfileRow label="Department" value="Computer Science" icon="🏢" />
-              <ProfileRow label="Year of Study" value="3rd Year" icon="🎓" />
-              <ProfileRow label="GPA" value="3.8 / 4.0" icon="📊" isLast />
+              <ProfileRow label="Department" value="Computer Science" icon="business-outline" />
+              <ProfileRow label="Year of Study" value="3rd Year" icon="school-outline" />
+              <ProfileRow label="GPA" value="3.8 / 4.0" icon="bar-chart-outline" isLast />
             </ThemedView>
 
             <ThemedText type="label" style={styles.sectionLabel}>NOTIFICATIONS</ThemedText>
@@ -72,9 +73,9 @@ export default function ProfileScreen() {
 
             <ThemedText type="label" style={styles.sectionLabel}>ACCOUNT</ThemedText>
             <ThemedView variant="element" style={styles.card}>
-              <ActionRow label="Privacy Settings" icon="🔒" />
-              <ActionRow label="Export My Data" icon="📥" />
-              <ActionRow label="Sign Out" icon="🚪" isLast color={colors.accent} onPress={() => router.replace('/(auth)/welcome')} />
+              <ActionRow label="Privacy Settings" icon="lock-closed-outline" />
+              <ActionRow label="Export My Data" icon="download-outline" />
+              <ActionRow label="Sign Out" icon="log-out-outline" isLast color={colors.accent} onPress={() => router.replace('/(auth)/welcome')} />
             </ThemedView>
 
             <TouchableOpacity style={styles.deleteBtn}>
@@ -96,11 +97,13 @@ function StatItem({ label, value }: { label: string, value: string }) {
   );
 }
 
-function ProfileRow({ label, value, icon, isLast }: { label: string, value: string, icon: string, isLast?: boolean }) {
+function ProfileRow({ label, value, icon, isLast }: { label: string, value: string, icon: keyof typeof Ionicons.glyphMap, isLast?: boolean }) {
+  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
   return (
     <View style={[styles.row, !isLast && styles.borderBottom]}>
       <View style={styles.rowLabelGroup}>
-        <ThemedText style={styles.rowIcon}>{icon}</ThemedText>
+        <Ionicons name={icon} size={18} color={colors.primary} />
         <ThemedText style={styles.rowLabel}>{label}</ThemedText>
       </View>
       <ThemedText type="defaultSemiBold" style={styles.rowValue}>{value}</ThemedText>
@@ -122,14 +125,16 @@ function SettingRow({ label, subLabel, value, onToggle, isLast }: { label: strin
   );
 }
 
-function ActionRow({ label, icon, isLast, color, onPress }: { label: string, icon: string, isLast?: boolean, color?: string, onPress?: () => void }) {
+function ActionRow({ label, icon, isLast, color, onPress }: { label: string, icon: keyof typeof Ionicons.glyphMap, isLast?: boolean, color?: string, onPress?: () => void }) {
+  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
   return (
     <TouchableOpacity onPress={onPress} style={[styles.row, !isLast && styles.borderBottom]}>
       <View style={styles.rowLabelGroup}>
-        <ThemedText style={styles.rowIcon}>{icon}</ThemedText>
+        <Ionicons name={icon} size={18} color={color || colors.textSecondary} />
         <ThemedText style={[styles.rowLabel, color ? { color } : {}]}>{label}</ThemedText>
       </View>
-      <ThemedText style={{ opacity: 0.3 }}>→</ThemedText>
+      <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
     </TouchableOpacity>
   );
 }
@@ -224,9 +229,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-  },
-  rowIcon: {
-    fontSize: 18,
   },
   rowLabel: {
     fontSize: 15,

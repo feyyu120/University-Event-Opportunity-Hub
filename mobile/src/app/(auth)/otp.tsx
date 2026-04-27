@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, SafeAreaView, TextInput, TouchableOpacity, Keyboard } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
 import { Spacing, Colors } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
@@ -9,6 +10,7 @@ export default function OTPScreen() {
   const router = useRouter();
   const { email } = useLocalSearchParams<{ email: string }>();
   const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(30);
   const [attempts, setAttempts] = useState(0);
@@ -63,7 +65,7 @@ export default function OTPScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ThemedText style={styles.backIcon}>←</ThemedText>
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
 
         <View style={styles.content}>
@@ -127,10 +129,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     paddingVertical: Spacing.two,
-  },
-  backIcon: {
-    fontSize: 24,
-    fontWeight: 'bold',
   },
   content: {
     flex: 1,

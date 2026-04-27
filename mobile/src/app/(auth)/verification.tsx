@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, SafeAreaView, TextInput, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
 import { Spacing, Colors } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
@@ -8,6 +9,7 @@ import { useColorScheme } from 'react-native';
 export default function VerificationScreen() {
   const router = useRouter();
   const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
   const [email, setEmail] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
 
@@ -26,7 +28,7 @@ export default function VerificationScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <SafeAreaView style={styles.safeArea}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <ThemedText style={styles.backIcon}>←</ThemedText>
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
 
           <View style={styles.content}>
@@ -87,10 +89,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     paddingVertical: Spacing.two,
-  },
-  backIcon: {
-    fontSize: 24,
-    fontWeight: 'bold',
   },
   content: {
     flex: 1,

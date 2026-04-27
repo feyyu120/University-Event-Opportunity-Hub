@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Image, TouchableOpacity, useColorScheme, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from './Themed';
 import { Spacing, Colors, Radius, Shadows } from '@/constants/theme';
 
@@ -26,12 +27,12 @@ interface OpportunityCardProps {
   onShowReason: (item: Opportunity) => void;
 }
 
-const TYPE_CONFIG = {
-  Event: { emoji: '🗓️', color: '#8B5CF6' },
-  Scholarship: { emoji: '🎓', color: '#10B981' },
-  Internship: { emoji: '💼', color: '#6366F1' },
-  Workshop: { emoji: '🔧', color: '#F59E0B' },
-  Hackathon: { emoji: '🚀', color: '#EC4899' },
+const TYPE_CONFIG: Record<OpportunityType, { icon: keyof typeof Ionicons.glyphMap; color: string }> = {
+  Event: { icon: 'calendar', color: '#8B5CF6' },
+  Scholarship: { icon: 'school', color: '#10B981' },
+  Internship: { icon: 'briefcase', color: '#6366F1' },
+  Workshop: { icon: 'construct', color: '#F59E0B' },
+  Hackathon: { icon: 'rocket', color: '#EC4899' },
 };
 
 export function OpportunityCard({ item, onBookmark, onApply, onShowReason }: OpportunityCardProps) {
@@ -47,7 +48,7 @@ export function OpportunityCard({ item, onBookmark, onApply, onShowReason }: Opp
           <Image source={{ uri: item.image }} style={styles.image} />
         ) : (
           <View style={[styles.imageFallback, { backgroundColor: config.color + '20' }]}>
-            <ThemedText style={{ fontSize: 40 }}>{config.emoji}</ThemedText>
+            <Ionicons name={config.icon} size={40} color={config.color} />
           </View>
         )}
         <View style={styles.imageOverlay}>
@@ -65,7 +66,7 @@ export function OpportunityCard({ item, onBookmark, onApply, onShowReason }: Opp
           onPress={() => onBookmark(item.id)}
         >
           <View style={styles.glassCircle}>
-            <ThemedText style={{ fontSize: 18 }}>{item.saved ? '❤️' : '🤍'}</ThemedText>
+            <Ionicons name={item.saved ? 'heart' : 'heart-outline'} size={20} color={item.saved ? '#EF4444' : '#FFF'} />
           </View>
         </TouchableOpacity>
       </View>
@@ -84,13 +85,19 @@ export function OpportunityCard({ item, onBookmark, onApply, onShowReason }: Opp
           </View>
           <View style={styles.statBox}>
             <ThemedText style={styles.statLabel}>INTEREST</ThemedText>
-            <ThemedText style={styles.statValue}>🔥 {item.saveCount || 0}</ThemedText>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Ionicons name="flame" size={14} color="#F59E0B" />
+              <ThemedText style={styles.statValue}>{item.saveCount || 0}</ThemedText>
+            </View>
           </View>
         </View>
 
         {item.reason && (
           <TouchableOpacity onPress={() => onShowReason(item)} style={styles.reasonBtn}>
-            <ThemedText style={styles.reasonText}>✨ {item.reason}</ThemedText>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="sparkles" size={14} color="#6366f1" />
+              <ThemedText style={styles.reasonText}>{item.reason}</ThemedText>
+            </View>
           </TouchableOpacity>
         )}
 
@@ -223,6 +230,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#6366f1',
     fontWeight: '600',
+    flex: 1,
   },
   footer: {
     flexDirection: 'row',

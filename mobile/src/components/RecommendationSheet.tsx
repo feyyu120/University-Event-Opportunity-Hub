@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Modal, TouchableOpacity, Animated } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView, ThemedButton } from './Themed';
 import { Spacing, Colors } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
@@ -32,14 +33,18 @@ export function RecommendationSheet({ item, visible, onClose, onShowLess }: Reco
           
           <View style={styles.content}>
             <View style={styles.reasonRow}>
-              <ThemedText style={styles.icon}>💡</ThemedText>
+              <View style={[styles.iconCircle, { backgroundColor: '#F59E0B15' }]}>
+                <Ionicons name="bulb-outline" size={22} color="#F59E0B" />
+              </View>
               <ThemedText style={styles.reasonText}>
                 {item.reason || `Recommended because you selected ${item.type}s as an interest.`}
               </ThemedText>
             </View>
             
             <View style={styles.reasonRow}>
-              <ThemedText style={styles.icon}>👥</ThemedText>
+              <View style={[styles.iconCircle, { backgroundColor: '#6366F115' }]}>
+                <Ionicons name="people-outline" size={22} color="#6366F1" />
+              </View>
               <ThemedText style={styles.reasonText}>
                 Popular among students in your department.
               </ThemedText>
@@ -99,8 +104,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.three,
   },
-  icon: {
-    fontSize: 24,
+  iconCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   reasonText: {
     flex: 1,

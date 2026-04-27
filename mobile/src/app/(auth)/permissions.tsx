@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, SafeAreaView, Switch, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
 import { Spacing, Colors } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
@@ -23,7 +24,7 @@ export default function PermissionsScreen() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.content}>
           <View style={styles.iconContainer}>
-            <ThemedText style={styles.bigIcon}>🔔</ThemedText>
+            <Ionicons name="notifications-outline" size={52} color={colors.primary} />
           </View>
           
           <ThemedText type="title" style={styles.title}>Never Miss an Opportunity</ThemedText>
@@ -81,9 +82,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: Spacing.four,
-  },
-  bigIcon: {
-    fontSize: 60,
   },
   title: {
     textAlign: 'center',

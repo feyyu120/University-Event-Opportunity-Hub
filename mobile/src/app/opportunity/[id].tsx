@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { StyleSheet, View, Animated, TouchableOpacity, Share, Dimensions, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
 import { QASection } from '@/components/QASection';
@@ -67,11 +68,11 @@ export default function OpportunityDetailScreen() {
         <SafeAreaView edges={['top']}>
           <View style={styles.navContent}>
             <TouchableOpacity onPress={() => { haptic.light(); router.back(); }} style={styles.backBtn}>
-              <ThemedText style={{ fontSize: 24 }}>←</ThemedText>
+              <Ionicons name="arrow-back" size={24} color={colors.text} />
             </TouchableOpacity>
             <ThemedText type="subtitle" numberOfLines={1} style={{ flex: 1, textAlign: 'center' }}>{data.title}</ThemedText>
             <TouchableOpacity onPress={handleShare} style={styles.shareBtn}>
-              <ThemedText style={{ fontSize: 20 }}>↗</ThemedText>
+              <Ionicons name="share-outline" size={22} color={colors.text} />
             </TouchableOpacity>
           </View>
         </SafeAreaView>
@@ -92,7 +93,10 @@ export default function OpportunityDetailScreen() {
             <View style={styles.orgRow}>
               <ThemedText type="label">{data.organization}</ThemedText>
               <View style={[styles.verifiedBadge, { backgroundColor: colors.success + '15' }]}>
-                <ThemedText style={[styles.verifiedText, { color: colors.success }]}>✓ Verified</ThemedText>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Ionicons name="checkmark-circle" size={12} color={colors.success} />
+                  <ThemedText style={[styles.verifiedText, { color: colors.success }]}>Verified</ThemedText>
+                </View>
               </View>
             </View>
             <ThemedText type="title" style={styles.title}>{data.title}</ThemedText>
@@ -110,10 +114,15 @@ export default function OpportunityDetailScreen() {
           </View>
 
           <View style={[styles.actionRow, Shadows.medium, { backgroundColor: colors.backgroundElement }]}>
-            <ActionItem icon={isSaved ? "❤️" : "🤍"} label={isSaved ? "Saved" : "Save"} onPress={handleSave} />
-            <ActionItem icon="🗓️" label="Add" onPress={() => haptic.light()} />
-            <ActionItem icon="📢" label="Share" onPress={handleShare} />
-            <ActionItem icon="🚩" label="Report" onPress={() => haptic.warning()} />
+            <ActionItem 
+              icon={isSaved ? "heart" : "heart-outline"} 
+              iconColor={isSaved ? "#EF4444" : colors.text}
+              label={isSaved ? "Saved" : "Save"} 
+              onPress={handleSave} 
+            />
+            <ActionItem icon="calendar-outline" label="Add" onPress={() => haptic.light()} />
+            <ActionItem icon="share-social-outline" label="Share" onPress={handleShare} />
+            <ActionItem icon="flag-outline" label="Report" onPress={() => haptic.warning()} />
           </View>
 
           <View style={styles.section}>
@@ -131,9 +140,9 @@ export default function OpportunityDetailScreen() {
           <View style={styles.section}>
             <ThemedText type="subtitle" style={styles.sectionTitle}>Details</ThemedText>
             <View style={styles.infoGrid}>
-              <InfoItem icon="📍" label="Location" value={data.location} />
-              <InfoItem icon="🏢" label="Work Mode" value={data.mode} />
-              <InfoItem icon="📧" label="Inquiries" value={data.contact} />
+              <InfoItem icon="location-outline" label="Location" value={data.location} />
+              <InfoItem icon="business-outline" label="Work Mode" value={data.mode} />
+              <InfoItem icon="mail-outline" label="Inquiries" value={data.contact} />
             </View>
 
             {getBuildingLocation(data.location) && (
@@ -166,27 +175,31 @@ export default function OpportunityDetailScreen() {
       <Animated.View style={[styles.floatingBack, { opacity: Animated.subtract(1, headerOpacity) }]}>
         <TouchableOpacity onPress={() => { haptic.light(); router.back(); }} style={styles.circleBtn}>
           <ThemedView variant="blur" style={StyleSheet.absoluteFill} />
-          <ThemedText style={{ fontSize: 24, fontWeight: 'bold' }}>←</ThemedText>
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
       </Animated.View>
     </ThemedView>
   );
 }
 
-function ActionItem({ icon, label, onPress }: { icon: string, label: string, onPress: () => void }) {
+function ActionItem({ icon, iconColor, label, onPress }: { icon: keyof typeof Ionicons.glyphMap, iconColor?: string, label: string, onPress: () => void }) {
+  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
   return (
     <TouchableOpacity onPress={onPress} style={styles.actionItem}>
-      <ThemedText style={{ fontSize: 20, marginBottom: 4 }}>{icon}</ThemedText>
+      <Ionicons name={icon} size={22} color={iconColor || colors.text} style={{ marginBottom: 4 }} />
       <ThemedText type="caption">{label}</ThemedText>
     </TouchableOpacity>
   );
 }
 
-function InfoItem({ icon, label, value }: { icon: string, label: string, value: string }) {
+function InfoItem({ icon, label, value }: { icon: keyof typeof Ionicons.glyphMap, label: string, value: string }) {
+  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
   return (
     <View style={styles.infoItem}>
-      <View style={styles.infoIconBox}>
-        <ThemedText style={{ fontSize: 20 }}>{icon}</ThemedText>
+      <View style={[styles.infoIconBox, { backgroundColor: colors.primary + '10' }]}>
+        <Ionicons name={icon} size={20} color={colors.primary} />
       </View>
       <View style={{ flex: 1 }}>
         <ThemedText type="label" style={{ marginBottom: 2 }}>{label}</ThemedText>
@@ -319,7 +332,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: 'rgba(0,0,0,0.04)',
     justifyContent: 'center',
     alignItems: 'center',
   },

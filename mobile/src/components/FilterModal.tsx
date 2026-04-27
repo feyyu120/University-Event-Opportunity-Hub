@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Modal, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView, ThemedButton } from './Themed';
 import { Spacing, Colors } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
@@ -11,11 +12,17 @@ interface FilterSectionProps {
 
 function FilterSection({ title, children }: FilterSectionProps) {
   const [expanded, setExpanded] = useState(true);
+  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
   return (
     <View style={styles.section}>
       <TouchableOpacity style={styles.sectionHeader} onPress={() => setExpanded(!expanded)}>
         <ThemedText type="defaultSemiBold">{title}</ThemedText>
-        <ThemedText>{expanded ? '▼' : '▶'}</ThemedText>
+        <Ionicons 
+          name={expanded ? 'chevron-down' : 'chevron-forward'} 
+          size={18} 
+          color={colors.textSecondary} 
+        />
       </TouchableOpacity>
       {expanded && <View style={styles.sectionContent}>{children}</View>}
     </View>

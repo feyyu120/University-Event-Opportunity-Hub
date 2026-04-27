@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, FlatList, SafeAreaView, TouchableOpacity, RefreshControl, ActivityIndicator, useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from '@/components/Themed';
 import { SkeletonLoader } from '@/components/Feedback';
 import { OpportunityCard, Opportunity } from '@/components/OpportunityCard';
@@ -13,28 +14,28 @@ import { checkNotificationStatus, requestNotificationPermissions } from '@/utils
 import { useInAppNotification } from '@/components/InAppNotification';
 
 const INITIAL_DATA: Opportunity[] = [
-  { 
-    id: '1', 
-    type: 'Internship', 
-    title: 'Software Engineer Intern', 
-    organization: 'Google', 
-    deadline: 'Oct 30', 
-    description: 'Working on core search algorithms.', 
-    matchScore: 98, 
-    saveCount: 1240, 
+  {
+    id: '1',
+    type: 'Internship',
+    title: 'Software Engineer Intern',
+    organization: 'Google',
+    deadline: 'Oct 30',
+    description: 'Working on core search algorithms.',
+    matchScore: 98,
+    saveCount: 1240,
     reason: 'Recommended because you liked AI and Web Dev.',
     image: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=1000'
   },
   { id: '2', type: 'Scholarship', title: 'Academic Excellence Grant', organization: 'University Foundation', deadline: 'Tomorrow', description: 'Merit-based scholarship for CS students.', saveCount: 450 },
-  { 
-    id: '3', 
-    type: 'Event', 
-    title: 'Tech Talk: Future of AI', 
-    organization: 'ACM Student Chapter', 
-    deadline: 'Oct 25', 
-    description: 'Guest speaker from OpenAI.', 
-    matchScore: 92, 
-    saveCount: 89, 
+  {
+    id: '3',
+    type: 'Event',
+    title: 'Tech Talk: Future of AI',
+    organization: 'ACM Student Chapter',
+    deadline: 'Oct 25',
+    description: 'Guest speaker from OpenAI.',
+    matchScore: 92,
+    saveCount: 89,
     reason: 'Popular among 3rd year students.',
     image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=1000'
   },
@@ -89,29 +90,29 @@ export default function HomeFeedScreen() {
     if (index === 0) {
       return (
         <View>
-          <TrendingSection 
-            title="🔥 Top Trending" 
-            items={TRENDING_DATA} 
-            onPress={(item) => handlePressCard(item.id)} 
+          <TrendingSection
+            title="Top Trending"
+            items={TRENDING_DATA}
+            onPress={(item) => handlePressCard(item.id)}
           />
-          <OpportunityCard 
-            item={item} 
-            onBookmark={handleBookmark} 
-            onApply={() => handlePressCard(item.id)} 
+          <OpportunityCard
+            item={item}
+            onBookmark={handleBookmark}
+            onApply={() => handlePressCard(item.id)}
             onShowReason={(i) => { setSelectedItem(i); setSheetVisible(true); }}
           />
         </View>
       );
     }
-    
+
     if (index === 1) {
       return (
         <View>
           <DeadlineAlertSection items={[INITIAL_DATA[1]]} />
-          <OpportunityCard 
-            item={item} 
-            onBookmark={handleBookmark} 
-            onApply={() => handlePressCard(item.id)} 
+          <OpportunityCard
+            item={item}
+            onBookmark={handleBookmark}
+            onApply={() => handlePressCard(item.id)}
             onShowReason={(i) => { setSelectedItem(i); setSheetVisible(true); }}
           />
         </View>
@@ -119,10 +120,10 @@ export default function HomeFeedScreen() {
     }
 
     return (
-      <OpportunityCard 
-        item={item} 
-        onBookmark={handleBookmark} 
-        onApply={() => handlePressCard(item.id)} 
+      <OpportunityCard
+        item={item}
+        onBookmark={handleBookmark}
+        onApply={() => handlePressCard(item.id)}
         onShowReason={(i) => { setSelectedItem(i); setSheetVisible(true); }}
       />
     );
@@ -137,14 +138,14 @@ export default function HomeFeedScreen() {
             <ThemedText type="h1">Curated</ThemedText>
           </View>
           <View style={styles.headerIcons}>
-            <TouchableOpacity 
-              style={[styles.iconBtn, { backgroundColor: colors.backgroundElement }]} 
+            <TouchableOpacity
+              style={[styles.iconBtn, { backgroundColor: colors.backgroundElement }]}
               onPress={() => { haptic.light(); router.push('/search'); }}
             >
-              <ThemedText style={{ fontSize: 20 }}>🔍</ThemedText>
+              <Ionicons name="search-outline" size={20} color={colors.text} />
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.filterBtn, { backgroundColor: colors.text }]} 
+            <TouchableOpacity
+              style={[styles.filterBtn, { backgroundColor: colors.text }]}
               onPress={() => { haptic.medium(); setFilterVisible(true); }}
             >
               <ThemedText style={[styles.filterText, { color: colors.background }]}>Filter</ThemedText>
@@ -174,16 +175,16 @@ export default function HomeFeedScreen() {
           />
         )}
 
-        <RecommendationSheet 
-          item={selectedItem} 
-          visible={sheetVisible} 
-          onClose={() => setSheetVisible(false)} 
+        <RecommendationSheet
+          item={selectedItem}
+          visible={sheetVisible}
+          onClose={() => setSheetVisible(false)}
           onShowLess={(id) => setData(prev => prev.filter(item => item.id !== id))}
         />
-        <FilterModal 
-          visible={filterVisible} 
-          onClose={() => setFilterVisible(false)} 
-          onApply={() => { haptic.success(); setFilterVisible(false); setActiveFilterCount(2); }} 
+        <FilterModal
+          visible={filterVisible}
+          onClose={() => setFilterVisible(false)}
+          onApply={() => { haptic.success(); setFilterVisible(false); setActiveFilterCount(2); }}
         />
       </SafeAreaView>
     </ThemedView>
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
+    borderColor: 'transparent',
   },
   filterBtn: {
     flexDirection: 'row',

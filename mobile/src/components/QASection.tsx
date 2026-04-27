@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, TextInput, FlatList } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView, ThemedButton } from './Themed';
 import { Spacing, Colors } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
@@ -59,13 +60,19 @@ export function QASection() {
   const renderComment = (item: Comment, isReply = false) => (
     <View key={item.id} style={[styles.commentCard, isReply && styles.replyCard, isReply && { borderLeftColor: colors.border }]}>
       <View style={styles.commentHeader}>
-        <ThemedText type="defaultSemiBold">{item.isAnonymous ? '👤 Anonymous' : item.user}</ThemedText>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          {item.isAnonymous && <Ionicons name="person-circle-outline" size={16} color={colors.textSecondary} />}
+          <ThemedText type="defaultSemiBold">{item.isAnonymous ? 'Anonymous' : item.user}</ThemedText>
+        </View>
         <ThemedText style={styles.time}>{item.time}</ThemedText>
       </View>
       <ThemedText style={styles.commentText}>{item.text}</ThemedText>
       <View style={styles.commentFooter}>
         <TouchableOpacity style={[styles.upvoteBtn, { backgroundColor: colors.backgroundSelected }]}>
-          <ThemedText style={styles.upvoteText}>▲ {item.upvotes}</ThemedText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Ionicons name="arrow-up" size={14} color={colors.text} />
+            <ThemedText style={styles.upvoteText}>{item.upvotes}</ThemedText>
+          </View>
         </TouchableOpacity>
         {!isReply && (
           <TouchableOpacity>
@@ -96,7 +103,7 @@ export function QASection() {
             onPress={() => setIsAnonymous(!isAnonymous)}
           >
             <View style={[styles.checkbox, { borderColor: colors.border }, isAnonymous && { backgroundColor: colors.primary, borderColor: colors.primary }]}>
-              {isAnonymous && <ThemedText style={{ color: '#FFF', fontSize: 10 }}>✓</ThemedText>}
+              {isAnonymous && <Ionicons name="checkmark" size={12} color="#FFF" />}
             </View>
             <ThemedText style={styles.anonText}>Post anonymously</ThemedText>
           </TouchableOpacity>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, SafeAreaView, TextInput, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
 import { InterestChips, Interest } from '@/components/InterestChips';
 import { Spacing, Colors } from '@/constants/theme';
@@ -9,15 +10,15 @@ import { useColorScheme } from 'react-native';
 const DEPARTMENTS = ['Computer Science', 'Business', 'Engineering', 'Medicine', 'Arts', 'Law', 'Science'];
 const YEARS = ['1st Year', '2nd Year', '3rd Year', '4th Year', "Master's", 'PhD'];
 const INTERESTS: Interest[] = [
-  { id: '1', name: 'AI', icon: '🤖', category: 'Technology' },
-  { id: '2', name: 'Web Dev', icon: '🌐', category: 'Technology' },
-  { id: '3', name: 'Cybersecurity', icon: '🔒', category: 'Technology' },
-  { id: '4', name: 'Marketing', icon: '📈', category: 'Business' },
-  { id: '5', name: 'Finance', icon: '💰', category: 'Business' },
-  { id: '6', name: 'Entrepreneurship', icon: '🚀', category: 'Business' },
-  { id: '7', name: 'UI/UX', icon: '🎨', category: 'Design' },
-  { id: '8', name: 'Graphic Design', icon: '✒️', category: 'Design' },
-  { id: '9', name: 'Research', icon: '🔬', category: 'Science' },
+  { id: '1', name: 'AI', icon: 'hardware-chip-outline', category: 'Technology' },
+  { id: '2', name: 'Web Dev', icon: 'globe-outline', category: 'Technology' },
+  { id: '3', name: 'Cybersecurity', icon: 'shield-checkmark-outline', category: 'Technology' },
+  { id: '4', name: 'Marketing', icon: 'trending-up-outline', category: 'Business' },
+  { id: '5', name: 'Finance', icon: 'cash-outline', category: 'Business' },
+  { id: '6', name: 'Entrepreneurship', icon: 'rocket-outline', category: 'Business' },
+  { id: '7', name: 'UI/UX', icon: 'color-palette-outline', category: 'Design' },
+  { id: '8', name: 'Graphic Design', icon: 'brush-outline', category: 'Design' },
+  { id: '9', name: 'Research', icon: 'flask-outline', category: 'Science' },
 ];
 const GOALS = ['Internship', 'Scholarship', 'Networking', 'Learning new skill', 'Part-time job'];
 
@@ -54,7 +55,7 @@ export default function ProfileCreationScreen() {
           {/* Profile Pic Placeholder */}
           <View style={styles.avatarSection}>
             <TouchableOpacity style={[styles.avatar, { backgroundColor: colors.backgroundElement }]}>
-              <ThemedText style={{ fontSize: 40 }}>👤</ThemedText>
+              <Ionicons name="person-outline" size={40} color={colors.textSecondary} />
             </TouchableOpacity>
             <ThemedText style={styles.avatarLabel}>Add Photo</ThemedText>
           </View>

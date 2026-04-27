@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from './Themed';
 import { Spacing } from '@/constants/theme';
 import { BuildingLocation, openInExternalMaps } from '@/utils/locationHelper';
@@ -28,7 +29,7 @@ export function CampusMap({ locations, fullLocationName }: CampusMapProps) {
             style={[styles.pinContainer, { left: `${loc.x}%`, top: `${loc.y}%` }]}
           >
             <View style={styles.pin}>
-              <ThemedText style={{ fontSize: 16 }}>📍</ThemedText>
+              <Ionicons name="location" size={20} color="#EF4444" />
             </View>
             <View style={styles.label}>
               <ThemedText style={styles.labelText}>{loc.name}</ThemedText>
@@ -42,7 +43,7 @@ export function CampusMap({ locations, fullLocationName }: CampusMapProps) {
         onPress={() => openInExternalMaps(fullLocationName)}
       >
         <ThemedText style={styles.externalBtnText}>Open in Google Maps</ThemedText>
-        <ThemedText style={{ fontSize: 12 }}>↗</ThemedText>
+        <Ionicons name="open-outline" size={16} color="rgba(0,0,0,0.6)" />
       </TouchableOpacity>
     </View>
   );
