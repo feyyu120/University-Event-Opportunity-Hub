@@ -17,7 +17,7 @@ if ($method === 'POST') {
         exit;   
     }
  
-    if (!Validator::ischeckedUserId($data['user_id'])) {
+    if (Validator::ischeckedUserId($data['user_id'])) {
         http_response_code(404);
         echo json_encode(["message" => "User Unknown"]);
         exit;   
