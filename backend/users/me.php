@@ -19,7 +19,7 @@ if (!$user_id || Validator::isUniversityEmail($user_id)) {
 }
 switch ($method) {
     case 'GET':
-        
+
         try {
             $sql = "SELECT u.id, u.email, u.full_name, u.department, u.year, u.role, 
                         u.interests, u.goals, u.is_active, u.created_at,
@@ -89,3 +89,4 @@ switch ($method) {
         break;
 
 }
+?>

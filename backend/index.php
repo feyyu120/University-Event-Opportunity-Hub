@@ -42,12 +42,14 @@ switch ($route) {
     
     case 'users/applications':
         require __DIR__ . '/users/applications.php';
-        break;
+        break; 
 
-            // i will work with those cases next
-    // case 'opportunities': 
-    //     require __DIR__ . '/opportunities/list.php';
-    //     break;
+    case 'opportunities/feed': 
+        require __DIR__ . '/opportunities/feed.php';
+        break;
+    case 'opportunities/report': 
+        require __DIR__ . '/opportunities/report.php';
+        break;
 
     // case '':
     //     echo json_encode(["status" => "online", "message" => "University Hub API Gateway"]);

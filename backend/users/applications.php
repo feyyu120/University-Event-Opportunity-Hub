@@ -74,4 +74,4 @@ if ($method === 'GET') {
         "message" => "users applications list",
        "applications" =>$stmt->fetchAll()
     ]);
-}
+}?>
