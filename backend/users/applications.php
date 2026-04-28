@@ -62,7 +62,7 @@ if ($method === 'GET') {
     $limit = $_GET['limit'] ?? 10;
     $offset = $_GET['offset'] ?? 0;
 
-    if(empty($user_id) || !Validator::ischeckedUserId($user_id)) {
+    if(empty($user_id) || Validator::ischeckedUserId($user_id)) {
         echo json_encode(["message" => "user Unknown"]);
         exit;   
     }
