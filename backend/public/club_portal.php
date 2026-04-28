@@ -129,8 +129,11 @@
 </div>
 </div>
 
-<script>
-    const API_BASE = "https://astu-event-center-backend.onrender.com/"; 
+<script> 
+const API_BASE = window.location.hostname === "localhost" 
+    ? "http://localhost/University-Event-Opportunity-Hub/backend" 
+    : "https://astu-event-center-backend.onrender.com";
+
     let USER_ID = localStorage.getItem('user_id'); 
     let currentEditId = null;
     if(USER_ID) {
