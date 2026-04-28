@@ -1,6 +1,7 @@
 <?php
 header("Content-Type: application/json");
 require_once __DIR__ . '/../src/Shared/db.php';  
+require_once __DIR__ . '/../src/Shared/validator.php';  
 
 $method = $_SERVER['REQUEST_METHOD'];
  
@@ -17,7 +18,7 @@ $opp_id = $data['opportunity_id'] ?? null;
 $user_id = $data['user_id'] ?? null;
 $reason = trim($data['reason'] ?? '');
 
-if (!$opp_id || !$user_id || empty($reason)) {
+if (!$opp_id || Validator::ischeckedUserId($user_id)|| !$user_id || empty($reason)) {
     http_response_code(400);
     echo json_encode([
         "success" => false, 
@@ -55,7 +56,7 @@ try {
         echo json_encode(["success" => false, "message" => "You have already reported this opportunity. Our team is reviewing it."]);
         exit;
     } 
-    
+
     $stmt = $pdo->prepare("INSERT INTO reports (opportunity_id, reported_by, reason, status) VALUES (?, ?, ?, 'pending')");
     $stmt->execute([$opp_id, $user_id, htmlspecialchars($reason)]);  
 
