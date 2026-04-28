@@ -7,8 +7,7 @@ astu_event_center-backend/
 │   └── Shared/         # Database connection, Utilities
 ├── public/
 │   └── index.php       # The main entry point for Render
-├── Dockerfile          # For Render deployment
-├── composer.json       # If you use libraries  
+├── Dockerfile          # For Render deployment 
 ```
 ---
 
