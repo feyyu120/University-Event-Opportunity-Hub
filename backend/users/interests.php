@@ -26,3 +26,4 @@ if ($action === 'add') {
 }
 
 echo json_encode(["message" => "Interests updated"]);
+?>
