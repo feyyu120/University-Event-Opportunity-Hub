@@ -133,6 +133,8 @@ and the response will be
     }
 }
 ```
+
+
 ---
 ## partial user data update 
 in this we use the PUT method for partial user data update like this 
@@ -190,7 +192,7 @@ if the user wents to apply an opportunity we do this
 method  ## POST 
 
 ```
-API https://astu-event-center-backend.onrender.com/users/applications?user_id=8ace104e-85284f22-a952-00ae3576f4b0
+API https://astu-event-center-backend.onrender.com/users/applications
 ```
 
 and  send data like this 
