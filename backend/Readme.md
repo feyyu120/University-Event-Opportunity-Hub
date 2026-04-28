@@ -3,7 +3,6 @@
 astu_event_center-backend/
 ├── src/
 │   ├── Auth/           # Registration, Login, OTP logic
-│   ├── Opportunities/  # Feed, CRUD, Search
 │   └── Shared/         # Database connection, Utilities
 ├── public/
 │   └── index.php       # The main entry point for Render
