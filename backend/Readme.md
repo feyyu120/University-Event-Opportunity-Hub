@@ -247,10 +247,61 @@ and the response will be
 
 ---
 ## user saved opportunites list and save opportunity 
+users saved lists will be displayed by get method like this 
+method GET
 
-
+```
+https://astu-event-center-backend.onrender.com/users/saved?user_id=8ace104e-8528-4f22-a952-00ae3576f4b0
+```
 ---
 
+ and the response will be 
+
+```json
+{
+    "success": true,
+    "count": 1,
+    "data": [
+        {
+            "id": "8ace104e-8528-4f22-a952-00ae3576f4b0",
+            "title": "bunnin",
+            "organization_name": "jfksdjkfb",
+            "deadline": "2026-04-30 14:57:43",
+            "save_count": 1,
+            "saved_at": "2026-04-28 14:26:34.790897"
+        }
+    ]
+}
+```
+## and the other is save the opportunity 
+
+and this was done ny POST method like sending body like this
+
+```json
+{ 
+    "user_id": "8ace104e-8528-4f22-a952-00ae3576f4b0",
+    "opportunity_id":"8ace104e-8528-4f22-a952-00ae3576f4b0"
+}
+```
+and if success you will get 
+
+```json
+{
+    "success": true,
+    "count": 1,
+    "data": [
+        {
+            "id": "8ace104e-8528-4f22-a952-00ae3576f4b0",
+            "title": "bunnin",
+            "organization_name": "jfksdjkfb",
+            "deadline": "2026-04-30 14:57:43",
+            "save_count": 1,
+            "saved_at": "2026-04-28 14:26:34.790897"
+        }
+    ]
+}
+```
+---
 
 ## the main list of the opportunity in the home page 
 
