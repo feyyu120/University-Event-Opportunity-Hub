@@ -245,7 +245,105 @@ and the response will be
 }
 ```
 
+---
+## user saved opportunites list and save opportunity 
 
+
+---
+
+
+## the main list of the opportunity in the home page 
+
+API
+```
+https://astu-event-center-backend.onrender.com/opportunities/feed
+```
+
+in this part we make a POST method request with body 
+```json 
+{ 
+    "user_id": "8ace104e-8528-4f22-a952-00ae3576f4b0"
+    // if you make a limit for pagination make  
+    // "page": 1,
+    // "limit": 5
+}
+```
+and the response will be like this 
+
+```json
+{
+    "page": 1,
+    "results": [
+        {
+            "id": "8ace104e-8528-4f22-a952-00ae3576f4b0",
+            "title": "bunnin",
+            "description": "sdofbsdojfbsdfjksdbfjksdfbsdjkfb",
+            "organization_name": "jfksdjkfb",
+            "deadline": "2026-04-30 14:57:43",
+            "created_at": "2026-04-28 11:25:56.489288",
+            "target_departments": null,
+            "min_year": 1,
+            "is_pinned": false,
+            "save_count": 0,
+            "tags": "{}",
+            "interest_score": "0",
+            "dept_score": "0.25",
+            "recency_score": "0.1500000000000000000000",
+            "popularity_score": "0.0000000000000000000000",
+            "total_score": "0.4000000000000000000000"
+        }
+        {
+            "id": "8ace104e-8528-4f22-a952-00ae3576f4b0",
+            "title": "welcome",
+            "description": "wennbsdfskjdnfkjsdbfksdfbsksdfjskldnfsdkfnsdksdjkfsdn",
+            "organization_name": "jfksdjkfb",
+            "deadline": "2026-04-30 14:57:43",
+            "created_at": "2026-04-28 11:25:56.489288",
+            "target_departments": null,
+            "min_year": 1,
+            "is_pinned": false,
+            "save_count": 0,
+            "tags": "{}",
+            "interest_score": "0",
+            "dept_score": "0.25",
+            "recency_score": "0.1500000000000000000000",
+            "popularity_score": "0.0000000000000000000000",
+            "total_score": "0.4000000000000000000000"
+        }
+    ]
+}
+```
+---
+
+
+## report 
+this works when the list opportunity was suspected by users where is fake opportunity 
+
+and this works in POST method with this API 
+
+```
+https://astu-event-center-backend.onrender.com/opportunities/report
+```
+and it accepts 
+
+```json
+{ 
+    "user_id": "8ace104e-8528-4f22-a952-00ae3576f4b0",
+    "opportunity_id":"8ace104e-8528-4f22-a952-00ae3576f4b0",
+    "reason": "This looks like a scam or fake internship."
+}
+```
+then the response will be 
+
+
+```json
+{
+    "success": true,
+    "message": "Report submitted. Thank you for keeping the community safe."
+}
+```
+
+---
 
 
 

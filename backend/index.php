@@ -31,8 +31,13 @@ switch ($route) {
             break;
     case 'users/me':
         require __DIR__ . '/users/me.php';
+
         break;
-    
+    case 'users/saved':
+        require __DIR__ . '/users/saved.php';
+        break;
+
+
     case 'auth/logout':
         require __DIR__ . '/src/auth/logout.php';
         break;
