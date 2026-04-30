@@ -29,7 +29,7 @@ try {
     $stmt->execute([$email]);
     $user = $stmt->fetch();
  
-    if ($user && password_verify($password, $user['password_hash'])) {
+    if ($user && $user['role'] == 'club_leader' && password_verify($password, $user['password_hash'])) {
          
         $updateStmt = $pdo->prepare("UPDATE users SET last_active_at = NOW() WHERE id = ?");
         $updateStmt->execute([$user['id']]);
@@ -38,17 +38,29 @@ try {
         $current_ip = $_SERVER['REMOTE_ADDR'];
 
         $updateIp = $pdo->prepare("UPDATE users SET last_login_ip = ? WHERE id = ?");
+
         $updateIp->execute([$current_ip, $user_id]);
+
+
+        $cstmt = $pdo->prepare("SELECT * FROM club_leaders WHERE user_id = ?");
+        $cstmt->execute([$user_id]);
+        $cuser = $cstmt->fetch(); 
+
+        if (!$cuser) {
+            http_response_code(403);
+            json_encode(["success" => false, "message" => "Access denied . unknown club leader"]);
+            exit;
+        }
+
         echo json_encode([
             "message" => "Login successful",
-            "user" => [
-                "id" => $user['id'],
-                "full_name" => $user['full_name'],
-                "email" => $user['email'],
-                "role" => $user['role'],
-                "university" => $user['university_name'],
-                "department" => $user['department'],
-                "year" => $user['year']
+            "club" => [
+                "id" => $cuser['id'],
+                "full_name" => $cuser['club_name'],
+                "email" => $cuser['organization_type'],
+                "role" => $cuser['bio'],
+                "university" => $cuser['posts_count'],
+                "department" => $cuser['is_verified'], 
             ]
         ]);
     } else { 

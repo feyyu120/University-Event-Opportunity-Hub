@@ -1,7 +1,12 @@
 <?php
 header("Content-Type: application/json");
-require_once __DIR__ . '/../src/Shared/db.php';
-require_once __DIR__ . '/../src/Shared/Guard.php';
+require_once __DIR__ . '/../../src/Shared/db.php';
+require_once __DIR__ . '/./../Shared/adminGuard.php';
+ 
+ini_set('session.cookie_httponly', 1);  
+ini_set('session.cookie_secure', 1);    
+ini_set('session.use_only_cookies', 1);
+session_start();
  
 Guard::checkIP();
 
@@ -27,18 +32,20 @@ try {
 
     $role = $user['role'];
  
-    if ($role === 'admin') {
+    if ($role === 'admin') {  
+        session_regenerate_id(true);  
+        $_SESSION['admin_id'] = $user['id'];
+        $_SESSION['last_activity'] = time(); 
+        
         echo json_encode([
-            "success" => true,
-            "redirect" => "/admin/dashboard",
-            "api_key" => "YOUR_SUPER_SECRET_KEY_FROM_ENV", 
-            "user" => ["id" => $user['id'], "name" => $user['full_name'], "role" => $role]
+            "success" => true, 
+            "message" => "Welcome, Admin",
+            "redirect" => "admin_dashboard.php"  
         ]);
-    } 
+    }
     elseif ($role === 'club_leader') {
         echo json_encode([
-            "success" => true,
-            "redirect" => "/club/management",
+            "success" => true, 
             "user" => ["id" => $user['id'], "name" => $user['full_name'], "role" => $role]
         ]);
     } 

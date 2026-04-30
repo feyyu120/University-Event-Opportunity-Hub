@@ -6,7 +6,12 @@ require_once __DIR__ . '/../src/Shared/clubGuard.php';
 $user_id = ClubGuard::checkAccess();
 $pdo = get_db_connection();
 
-try {
+try 
+{
+    $stmt = $pdo->prepare('SELECT id FROM club_leaders WHERE user_id = ?');
+    $stmt->execute([$user_id]); 
+    $club = $stmt->fetch(); 
+
     $stmt = $pdo->prepare("
     SELECT 
         id, title, status, description, organization_name, 
@@ -16,7 +21,7 @@ try {
     WHERE created_by = ? 
     ORDER BY created_at DESC
 ");
-    $stmt->execute([$user_id]);
+    $stmt->execute([$club["id"]]);
     $my_posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode([

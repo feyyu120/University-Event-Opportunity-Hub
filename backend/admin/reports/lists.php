@@ -1,14 +1,13 @@
 <?php
 header("Content-Type: application/json");
 require_once __DIR__ . '/../../src/Shared/db.php';
-require_once __DIR__ . '/../../src/Shared/Guard.php';
+require_once __DIR__ . '/../../src/Shared/adminGuard.php';
 
-Guard::moderateAccess('admin');
+Guard::checkAccess();
 
 $pdo = get_db_connection();
 
-try {
-    // We only fetch 'pending' reports.
+try { 
     $sql = "
         SELECT 
             r.id as report_id,

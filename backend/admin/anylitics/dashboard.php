@@ -1,18 +1,18 @@
 <?php
+// dahsboard API
 header("Content-Type: application/json");
+
+require_once __DIR__ . '/../../src/Shared/adminGuard.php';
 require_once __DIR__ . '/../../src/Shared/db.php';
-require_once __DIR__ . '/../../src/Shared/Guard.php';
 
-// 1. Secure the endpoint
-Guard::moderateAccess('admin');
-
-$pdo = get_db_connection();
 
 try {
-    $stats = [];
+    Guard::checkAccess();
+    Guard::checkIP();
 
-    // --- A. USER METRICS ---
-    // Total users, and a breakdown by role
+    $pdo = get_db_connection();
+
+    $stats = []; 
     $userStats = $pdo->query("
         SELECT 
             COUNT(*) as total_users,
@@ -21,9 +21,7 @@ try {
         FROM users
     ")->fetch(PDO::FETCH_ASSOC);
     $stats['users'] = $userStats;
-
-    // --- B. OPPORTUNITY METRICS ---
-    // Count by status (Live, Pending, Rejected)
+ 
     $oppStats = $pdo->query("
         SELECT 
             COUNT(*) as total_opportunities,
@@ -32,17 +30,14 @@ try {
         FROM opportunities
     ")->fetch(PDO::FETCH_ASSOC);
     $stats['opportunities'] = $oppStats;
-
-    // --- C. ENGAGEMENT METRICS ---
-    // Total applications and total saves across the platform
+ 
     $engagement = $pdo->query("
         SELECT 
             (SELECT COUNT(*) FROM user_applications) as total_applications,
             (SELECT COUNT(*) FROM saved_opportunities) as total_saves
     ")->fetch(PDO::FETCH_ASSOC);
     $stats['engagement'] = $engagement;
-
-    // --- D. POPULAR CATEGORIES (Top 5 Tags) ---
+ 
     $topTags = $pdo->query("
         SELECT t.name, COUNT(ot.opportunity_id) as usage_count
         FROM tags t
@@ -57,8 +52,8 @@ try {
     $stats['system_health'] = [
         "unresolved_reports" => $reports['unresolved_reports']
     ];
-
-    // 2. Final Response
+    
+ 
     echo json_encode([
         "success" => true,
         "timestamp" => date('c'),
