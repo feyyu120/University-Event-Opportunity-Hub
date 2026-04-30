@@ -3,7 +3,7 @@ header("Content-Type: application/json");
 require_once __DIR__ . '/../src/Shared/db.php';
 require_once __DIR__ . '/../src/Shared/clubGuard.php';
 
-$user_id = ClubGuard::checkAccess();
+$user_id = ClubGuard::checkAccessclub();
 $pdo = get_db_connection();
 
 try 

@@ -58,7 +58,10 @@
 </div>
 
 <script>
-    const url = 'http://localhost/University-Event-Opportunity-Hub/backend/';
+    const url = window.location.hostname === "localhost" 
+    ? "http://localhost/University-Event-Opportunity-Hub/backend/" 
+    : "https://astu-event-center-backend.onrender.com/";
+
     document.getElementById('loginForm').onsubmit = async (e) => {
         e.preventDefault();
         const msg = document.getElementById('msg');
@@ -81,13 +84,16 @@
 
             const data = await res.json();
            
-            if (data.success) {
+            if (data.success) { 
+                const adminId = data.admin_id || data.id; 
+                localStorage.setItem('storedUserId', adminId); 
+
                 msg.innerText = "Access Granted. Redirecting...";
                 msg.className = "success"; 
                 setTimeout(() => {
                     window.location.href = data.redirect || "admin_dashboard.php";
                 }, 1000);
-            } else {
+            }else {
                 msg.innerText = data.message || "Unauthorized access attempt.";
                 msg.className = "error";
             }

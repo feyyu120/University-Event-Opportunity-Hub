@@ -584,7 +584,9 @@ $admin_id = Guard::checkAccess();
 </div>
 
 <script>
-const API_URL = "http://localhost/University-Event-Opportunity-Hub/backend/admin";
+const API_BASE = window.location.hostname === "localhost" 
+    ? "http://localhost/University-Event-Opportunity-Hub/backend/" 
+    : "https://astu-event-center-backend.onrender.com/";
 
 // Toast notification system
 function showToast(message, type = 'success') {
@@ -597,10 +599,14 @@ function showToast(message, type = 'success') {
 
 // API fetch with error handling
 async function apiFetch(endpoint, method = 'GET', body = null) {
-    const options = {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
+    const storedUserId = localStorage.getItem('storedUserId');
+
+const options = {
+    method,
+    headers: {
+        'Content-Type': 'application/json',
+        'X-Auth-Token': storedUserId  
+    } 
     };
 
     if (body) options.body = JSON.stringify(body);

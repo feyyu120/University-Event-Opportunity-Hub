@@ -3,7 +3,7 @@ require_once __DIR__ . '/adminGuard.php';
 require_once __DIR__ . '/db.php';
 
 class ClubGuard extends Guard {
-    public static function checkAccess() { 
+    public static function checkAccessclub() { 
         self::checkIP();
          
         $club_leader_id = $_SERVER['HTTP_USER_ID'] ?? null; 
