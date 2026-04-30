@@ -605,7 +605,7 @@ const options = {
     method,
     headers: {
         'Content-Type': 'application/json',
-        'X-Auth-Token': storedUserId  
+        'User-ID': storedUserId  
     } 
     };
 
