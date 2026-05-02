@@ -1,14 +1,9 @@
-<?php
-require_once __DIR__ . '/../src/Shared/adminGuard.php';
-
-$admin_id = Guard::checkAccess(); 
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Admin Panel | ASTU</title>
+    <title>Master Admin Panel</title>
     <style>
         * {
             margin: 0;
@@ -569,11 +564,9 @@ $admin_id = Guard::checkAccess();
         </div>
     </div>
 
-    <div id="tab-data" class="tab-content hidden">
-        <!-- Club Management specific container that will include the add form -->
+    <div id="tab-data" class="tab-content hidden"> 
         <div id="club-management-container"></div>
-        
-        <!-- Generic data container for other tabs -->
+         
         <div id="data-container" class="content-card">
             <div class="loading">
                 <div class="loading-spinner"></div>
@@ -583,12 +576,8 @@ $admin_id = Guard::checkAccess();
     </div>
 </div>
 
-<script>
-const API_BASE = window.location.hostname === "localhost" 
-    ? "http://localhost/University-Event-Opportunity-Hub/backend/" 
-    : "https://astu-event-center-backend.onrender.com/";
+<script> 
 
-// Toast notification system
 function showToast(message, type = 'success') {
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
@@ -596,34 +585,34 @@ function showToast(message, type = 'success') {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
+ 
+const API_BASE = window.location.hostname === "localhost" 
+    ? "http://localhost/University-Event-Opportunity-Hub/backend/admin/" 
+    : "https://astu-event-center-backend.onrender.com";
 
-// API fetch with error handling
-async function apiFetch(endpoint, method = 'GET', body = null) {
-    const storedUserId = localStorage.getItem('storedUserId');
+async function apiFetch(endpoint, method = 'POST', body = null) {
+    const user_id = localStorage.getItem('storedUserId');
+     
+    const url = `${API_BASE}${endpoint}`;  
 
-const options = {
-    method,
-    headers: {
-        'Content-Type': 'application/json',
-        'User-ID': storedUserId  
-    } 
+    const options = {
+        method,
+        headers: {
+            'Content-Type': 'application/json',
+            'X-User-ID': user_id || '',  
+        } 
     };
 
     if (body) options.body = JSON.stringify(body);
 
     try {
-        const res = await fetch(`${API_URL}${endpoint}`, options);
+        const res = await fetch(url, options);
         
         if (!res.ok) {
             throw new Error(`HTTP ${res.status}: ${res.statusText}`);
         }
         
         const data = await res.json();
-        
-        if (!data.success) {
-            throw new Error(data.message || 'Unknown error occurred');
-        }
-        
         return data;
     } catch (error) {
         console.error('API Error:', error);
@@ -632,13 +621,11 @@ const options = {
     }
 }
 
-// Toggle sidebar for mobile
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     sidebar.classList.toggle('mobile-open');
 }
 
-// Close sidebar when clicking outside on mobile
 document.addEventListener('click', (e) => {
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.querySelector('.menu-toggle');
@@ -667,8 +654,9 @@ async function submitNewLeader() {
     if (!userId || !clubName) {
         showToast('Please fill in both the User ID and the Club Name', 'warning');
         return;
-    }
+    };
 
+    
     const button = event.target;
     const originalText = button.textContent;
     button.disabled = true;
@@ -713,18 +701,15 @@ async function loadTab(tab) {
         loadAnalytics();
     } else if (tab === 'club_management') {
         document.getElementById('tab-data').classList.remove('hidden');
-        // Hide the generic data container, show club management container
         document.getElementById('data-container').classList.add('hidden');
         await loadClubManagement();
     } else {
         document.getElementById('tab-data').classList.remove('hidden');
-        // Hide club management container, show generic data container
         document.getElementById('club-management-container')?.classList.add('hidden');
         document.getElementById('data-container').classList.remove('hidden');
         await loadTableData(tab);
     }
     
-    // Close sidebar on mobile after selection
     if (window.innerWidth <= 768) {
         document.getElementById('sidebar').classList.remove('mobile-open');
     }
@@ -742,7 +727,6 @@ function getTabTitle(tab) {
     return titles[tab] || 'Admin Panel';
 }
 
-// Load analytics with loading state
 async function loadAnalytics() {
     const container = document.getElementById('stats-container');
     container.innerHTML = `
@@ -753,7 +737,7 @@ async function loadAnalytics() {
     `;
 
     try {
-        const res = await apiFetch('/anylitics/dashboard.php');
+        const res = await apiFetch('/anylitics/dashboard.php' , 'GET');
         
         if (res.success && res.dashboard) {
             const d = res.dashboard;
@@ -786,10 +770,8 @@ async function loadAnalytics() {
         showToast('Failed to load dashboard data', 'error');
     }
 }
-
-// Load Club Management with Add Form
-async function loadClubManagement() {
-    // Create or get the club management container
+ 
+async function loadClubManagement() { 
     let container = document.getElementById('club-management-container');
     if (!container) {
         container = document.createElement('div');
@@ -797,11 +779,9 @@ async function loadClubManagement() {
         document.getElementById('tab-data').appendChild(container);
     }
     container.classList.remove('hidden');
-    
-    // Show the club management container and hide the generic one
+     
     document.getElementById('data-container').classList.add('hidden');
-    
-    // Build the HTML structure with the add form
+     
     container.innerHTML = `
         <!-- Button to show the form -->
         <div style="margin-bottom: 1rem;">
@@ -835,12 +815,10 @@ async function loadClubManagement() {
             </div>
         </div>
     `;
-
-    // Load the club leaders data
+ 
     await loadClubLeadersTable();
 }
-
-// Load club leaders table data
+ 
 async function loadClubLeadersTable() {
     const tableContainer = document.getElementById('club-leaders-table');
     if (!tableContainer) return;
@@ -1167,8 +1145,7 @@ async function blacklistUser(userId, name) {
         showToast(`Failed to blacklist ${name}: ${err.message}`, 'error');
     }
 }
-
-// Unban user with confirmation
+ 
 async function unbanUser(blacklistId) {
     if (!confirm("Are you sure you want to lift this ban? The user/IP will regain access immediately.")) {
         return;
@@ -1188,8 +1165,7 @@ async function unbanUser(blacklistId) {
         showToast(`Failed to lift ban: ${err.message}`, 'error');
     }
 }
-
-// Moderate content
+ 
 async function moderate(id, action) {
     let reason = "";
     if (action === 'reject') {
@@ -1227,8 +1203,7 @@ async function moderate(id, action) {
         button.textContent = originalText;
     }
 }
-
-// Resolve report
+ 
 async function resolveReport(reportId) {
     if (!confirm("Mark this report as resolved?")) return;
 
@@ -1250,25 +1225,18 @@ async function resolveReport(reportId) {
         button.textContent = originalText;
     }
 }
-
-// Logout
+ 
 async function logout() {
     if (!confirm('Are you sure you want to logout?')) return;
-    
-    try {
-        const res = await fetch(`${API_URL}/logout.php`, {
-            method: 'POST',
-            credentials: 'include'
-        });
-        
+    localStorage.removeItem("storedUserId");
+    try {  
         window.location.href = "admin_login.php";
     } catch (err) {
         console.error("Logout failed:", err);
         window.location.href = "admin_login.php";
     }
 }
-
-// Initialize dashboard
+ 
 loadTab('dashboard');
 </script>
 </body>

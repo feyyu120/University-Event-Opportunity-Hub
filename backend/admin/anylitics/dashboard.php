@@ -1,5 +1,4 @@
-<?php
-// dahsboard API
+<?php 
 header("Content-Type: application/json");
 
 require_once __DIR__ . '/../../src/Shared/adminGuard.php';
@@ -7,8 +6,7 @@ require_once __DIR__ . '/../../src/Shared/db.php';
 
 
 try {
-    Guard::checkAccess();
-    Guard::checkIP();
+    Guard::checkAccess(); 
 
     $pdo = get_db_connection();
 

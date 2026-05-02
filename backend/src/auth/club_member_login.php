@@ -48,7 +48,7 @@ try {
 
         if (!$cuser) {
             http_response_code(403);
-            json_encode(["success" => false, "message" => "Access denied . unknown club leader"]);
+           echo json_encode(["success" => false, "message" => "Access denied . unknown club leader"]);
             exit;
         }
 
