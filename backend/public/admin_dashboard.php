@@ -540,7 +540,7 @@
 
 <div class="sidebar" id="sidebar">
     <div style="padding: 1.5rem;">
-        <h2>🏛️ ASTU Admin</h2>
+        <h2> Admin</h2>
         <div class="nav-link active" data-tab="dashboard" onclick="loadTab('dashboard')">📊 Dashboard</div>
         <div class="nav-link" data-tab="moderation" onclick="loadTab('moderation')">⚖️ Moderation</div>
         <div class="nav-link" data-tab="reports" onclick="loadTab('reports')">🚩 Reports</div>
