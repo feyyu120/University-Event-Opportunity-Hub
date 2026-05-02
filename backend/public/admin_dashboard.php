@@ -588,7 +588,7 @@ function showToast(message, type = 'success') {
  
 const API_BASE = window.location.hostname === "localhost" 
     ? "http://localhost/University-Event-Opportunity-Hub/backend/admin/" 
-    : "https://astu-event-center-backend.onrender.com";
+    : "https://astu-event-center-backend.onrender.com/admin";
 
 async function apiFetch(endpoint, method = 'POST', body = null) {
     const user_id = localStorage.getItem('storedUserId');
