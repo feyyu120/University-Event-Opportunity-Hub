@@ -3,6 +3,9 @@ import { StyleSheet, View, FlatList, TouchableOpacity, SafeAreaView, ScrollView 
 import { ThemedText, ThemedView } from '@/components/Themed';
 import { Spacing, Colors } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { haptic } from '@/utils/hapticHelper';
 
 interface AppRecord {
   id: string;
@@ -20,8 +23,9 @@ const MOCK_APPS: AppRecord[] = [
 
 export default function ApplicationsScreen() {
   const [view, setView] = useState<'List' | 'Calendar'>('List');
-  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
+  const router = useRouter();
+  const HEADER_HEIGHT = 80;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -36,18 +40,21 @@ export default function ApplicationsScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.header}>
-          <ThemedText type="title">My Applications</ThemedText>
-          <View style={[styles.toggleContainer, { backgroundColor: colors.backgroundElement }]}>
-            {['List', 'Calendar'].map(v => (
-              <TouchableOpacity 
-                key={v} 
-                style={[styles.toggleBtn, view === v && { backgroundColor: colors.background }]}
-                onPress={() => setView(v as any)}
-              >
-                <ThemedText style={view === v && { fontWeight: '700' }}>{v}</ThemedText>
-              </TouchableOpacity>
-            ))}
+          <View>
+            <ThemedText type="title">My Applications</ThemedText>
+            <View style={[styles.toggleContainer, { backgroundColor: colors.backgroundElement }]}>
+              {['List', 'Calendar'].map(v => (
+                <TouchableOpacity 
+                  key={v} 
+                  style={[styles.toggleBtn, view === v && { backgroundColor: colors.background }]}
+                  onPress={() => setView(v as any)}
+                >
+                  <ThemedText style={view === v && { fontWeight: '700' }}>{v}</ThemedText>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
+          <View style={{ width: 44 }} />
         </View>
 
         {view === 'List' ? (
@@ -101,8 +108,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
     padding: Spacing.four,
-    gap: Spacing.two,
+    paddingBottom: Spacing.four,
+    minHeight: 120,
   },
   toggleContainer: {
     flexDirection: 'row',

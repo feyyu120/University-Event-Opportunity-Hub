@@ -1,10 +1,14 @@
-import React from 'react';
-import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from './Themed';
-import { Spacing, Colors } from '@/constants/theme';
+import { Spacing, Colors, Typography } from '@/constants/theme';
 import { useColorScheme } from 'react-native';
 import { Opportunity } from './OpportunityCard';
+import { nf, ms, vs, wp } from '@/utils/responsive';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const CARD_WIDTH = SCREEN_WIDTH - (Spacing.four * 2);
 
 interface SectionProps {
   title: string;
@@ -33,27 +37,52 @@ const getTypeColor = (type: string): string => {
 export function TrendingSection({ title, items, onPress }: SectionProps) {
   const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
+  const [activeIndex, setActiveIndex] = useState(0);
+  const flatListRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    if (!items || items.length === 0) return;
+    const timer = setInterval(() => {
+      const nextIndex = (activeIndex + 1) % items.length;
+      flatListRef.current?.scrollToOffset({
+        offset: nextIndex * CARD_WIDTH,
+        animated: true,
+      });
+      setActiveIndex(nextIndex);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [activeIndex, items.length]);
 
   return (
-    <View style={styles.section}>
-      <View style={styles.sectionTitleRow}>
-        <Ionicons name="flame" size={20} color="#F59E0B" />
+    <View style={styles.trendingSectionWrapper}>
+      <View style={styles.trendingTitleRow}>
+        <Ionicons name="flame" size={nf(20)} color="#F59E0B" />
         <ThemedText type="subtitle" style={styles.sectionTitleText}>Top Trending</ThemedText>
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
-        {items.map(item => (
-          <TouchableOpacity key={item.id} onPress={() => onPress(item)}>
+      <FlatList
+        ref={flatListRef}
+        data={items}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={(e) => {
+          const index = Math.round(e.nativeEvent.contentOffset.x / CARD_WIDTH);
+          if (index !== activeIndex) setActiveIndex(index);
+        }}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => onPress(item)}>
             <ThemedView variant="element" style={styles.trendingCard}>
-              <Ionicons name={getTypeIcon(item.type)} size={24} color={getTypeColor(item.type)} />
+              <Ionicons name={getTypeIcon(item.type)} size={nf(24)} color={getTypeColor(item.type)} />
               <ThemedText numberOfLines={2} style={styles.trendingTitle}>{item.title}</ThemedText>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <Ionicons name="star" size={12} color="#F59E0B" />
+                <Ionicons name="star" size={nf(12)} color="#F59E0B" />
                 <ThemedText style={styles.trendingStats}>{item.saveCount}</ThemedText>
               </View>
             </ThemedView>
           </TouchableOpacity>
-        ))}
-      </ScrollView>
+        )}
+        keyExtractor={item => item.id}
+      />
     </View>
   );
 }
@@ -71,10 +100,10 @@ export function RecommendationSection({ title, subtext, items, onPress }: Sectio
           <TouchableOpacity key={item.id} onPress={() => onPress(item)}>
             <ThemedView variant="element" style={styles.recommendCard}>
               <View style={[styles.recommendIcon, { backgroundColor: colors.backgroundSelected }]}>
-                <Ionicons 
-                  name={item.type === 'Internship' ? 'briefcase-outline' : 'rocket-outline'} 
-                  size={20} 
-                  color={colors.primary} 
+                <Ionicons
+                  name={item.type === 'Internship' ? 'briefcase-outline' : 'rocket-outline'}
+                  size={nf(20)}
+                  color={colors.primary}
                 />
               </View>
               <View style={{ flex: 1 }}>
@@ -96,7 +125,7 @@ export function DeadlineAlertSection({ items }: { items: Opportunity[] }) {
     <ThemedView variant="selected" style={[styles.alertSection, { backgroundColor: colors.accent + '15' }]}>
       <View style={styles.alertHeader}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Ionicons name="hourglass-outline" size={20} color={colors.accent} />
+          <Ionicons name="hourglass-outline" size={nf(20)} color={colors.accent} />
           <ThemedText type="subtitle">Ending Soon</ThemedText>
         </View>
         <ThemedText style={[styles.alertBadge, { backgroundColor: colors.accent, color: '#FFF' }]}>LAST CHANCE</ThemedText>
@@ -112,6 +141,15 @@ export function DeadlineAlertSection({ items }: { items: Opportunity[] }) {
 }
 
 const styles = StyleSheet.create({
+  trendingSectionWrapper: {
+    marginVertical: Spacing.four,
+  },
+  trendingTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: Spacing.two,
+  },
   section: {
     marginVertical: Spacing.four,
     marginHorizontal: -Spacing.four,
@@ -127,12 +165,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     marginBottom: Spacing.two,
   },
-  sectionTitleText: {
-  },
+  sectionTitleText: {},
   sectionSubtext: {
     paddingHorizontal: Spacing.four,
     opacity: 0.6,
-    fontSize: 12,
+    fontSize: Typography.caption,
     marginBottom: Spacing.two,
   },
   horizontalScroll: {
@@ -140,43 +177,43 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   trendingCard: {
-    width: 160,
+    width: CARD_WIDTH,
     padding: Spacing.three,
-    borderRadius: 20,
-    height: 140,
+    borderRadius: ms(20),
+    height: vs(140),
     justifyContent: 'space-between',
   },
   trendingTitle: {
-    fontSize: 14,
+    fontSize: Typography.small,
     fontWeight: '600',
   },
   trendingStats: {
-    fontSize: 11,
+    fontSize: Typography.caption,
     opacity: 0.5,
   },
   recommendCard: {
-    width: 240,
+    width: ms(240),
     padding: Spacing.three,
-    borderRadius: 20,
+    borderRadius: ms(20),
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
   },
   recommendIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: ms(40),
+    height: ms(40),
+    borderRadius: ms(10),
     justifyContent: 'center',
     alignItems: 'center',
   },
   recommendOrg: {
-    fontSize: 12,
+    fontSize: Typography.caption,
     opacity: 0.6,
   },
   alertSection: {
     margin: Spacing.four,
     padding: Spacing.four,
-    borderRadius: 24,
+    borderRadius: ms(24),
   },
   alertHeader: {
     flexDirection: 'row',
@@ -185,7 +222,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.three,
   },
   alertBadge: {
-    fontSize: 10,
+    fontSize: Typography.xs,
     fontWeight: 'bold',
     paddingHorizontal: Spacing.two,
     paddingVertical: 2,
@@ -197,7 +234,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.two,
   },
   countdown: {
-    fontSize: 12,
+    fontSize: Typography.caption,
     fontWeight: 'bold',
     marginLeft: Spacing.two,
   },

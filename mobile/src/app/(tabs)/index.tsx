@@ -18,11 +18,14 @@ import { OpportunityCard } from '@/components/OpportunityCard';
 import { TrendingSection, DeadlineAlertSection } from '@/components/ContextualSections';
 import { RecommendationSheet } from '@/components/RecommendationSheet';
 import { FilterModal } from '@/components/FilterModal';
-import { Spacing, Colors, Radius } from '@/constants/theme';
+import { Spacing, Colors, Radius, Typography } from '@/constants/theme';
 import { haptic } from '@/utils/hapticHelper';
 import { useOpportunities } from '@/hooks/useOpportunities';
 import { useAuth } from '@/context/AuthContext';
 import { type Opportunity } from '@/api/opportunities';
+import { nf, vs, ms } from '@/utils/responsive';
+
+
 
 // ─── Dynamic date helper ──────────────────────────────────────────────────────
 function getTodayLabel(): string {
@@ -44,7 +47,7 @@ function AnimatedCard({ children, index }: { children: React.ReactNode; index: n
 
 // ─── Error State ─────────────────────────────────────────────────────────────
 function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
-  const theme  = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
   return (
     <View style={errorStyles.wrapper}>
@@ -63,8 +66,8 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
 
 const errorStyles = StyleSheet.create({
   wrapper: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 12 },
-  title:   { marginTop: 8 },
-  msg:     { opacity: 0.6, textAlign: 'center', lineHeight: 22 },
+  title: { marginTop: 8 },
+  msg: { opacity: 0.6, textAlign: 'center', lineHeight: 22 },
   retryBtn: { marginTop: 8, paddingHorizontal: 32, paddingVertical: 14, borderRadius: Radius.full },
   retryText: { color: '#FFF', fontWeight: '700', fontSize: 15 },
 });
@@ -78,15 +81,15 @@ const TRENDING_DATA: Opportunity[] = [
 // ─── Screen ──────────────────────────────────────────────────────────────────
 export default function HomeFeedScreen() {
   const { user } = useAuth();
-  const theme    = useColorScheme() === 'dark' ? 'dark' : 'light';
-  const colors   = Colors[theme];
-  const router   = useRouter();
-  const insets   = useSafeAreaInsets();
+  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const { data, loading, refreshing, error, refresh, toggleSave } = useOpportunities();
 
-  const [selectedItem, setSelectedItem]   = useState<Opportunity | null>(null);
-  const [sheetVisible, setSheetVisible]   = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Opportunity | null>(null);
+  const [sheetVisible, setSheetVisible] = useState(false);
   const [filterVisible, setFilterVisible] = useState(false);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
 
@@ -122,7 +125,7 @@ export default function HomeFeedScreen() {
     );
   }, [data, handlePressCard, toggleSave]);
 
-  const HEADER_HEIGHT = 80;
+  const HEADER_HEIGHT = vs(80);
 
   return (
     <ThemedView style={styles.container}>
@@ -136,25 +139,25 @@ export default function HomeFeedScreen() {
           <View>
             <ThemedText type="label" style={styles.greeting}>{getTodayLabel()}</ThemedText>
             <ThemedText type="h1">
-              {activeFilterCount > 0 ? 'Filtered' : `Hi, ${firstName}`}
+              {activeFilterCount > 0 ? 'Filtered' : firstName}
             </ThemedText>
           </View>
 
           <View style={styles.headerIcons}>
             <TouchableOpacity
-              style={[styles.iconBtn, { backgroundColor: colors.backgroundElement }]}
+              style={styles.iconBtn}
               onPress={() => { haptic.light(); router.push('/search'); }}
               accessibilityRole="button"
             >
-              <Ionicons name="search" size={20} color={colors.text} />
+              <Ionicons name="search" size={nf(24)} color={colors.text} />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.iconBtn, { backgroundColor: colors.backgroundElement }]}
+              style={styles.iconBtn}
               onPress={() => { haptic.light(); router.push('/notifications'); }}
               accessibilityRole="button"
             >
-              <Ionicons name="notifications-outline" size={20} color={colors.text} />
+              <Ionicons name="notifications-outline" size={nf(24)} color={colors.text} />
               <View style={[styles.notifDot, { backgroundColor: colors.accent }]} />
             </TouchableOpacity>
 
@@ -163,7 +166,7 @@ export default function HomeFeedScreen() {
               onPress={() => { haptic.medium(); setFilterVisible(true); }}
               accessibilityRole="button"
             >
-              <Ionicons name="options-outline" size={16} color={colors.background} />
+              <Ionicons name="options-outline" size={nf(16)} color={colors.background} />
               <ThemedText style={[styles.filterText, { color: colors.background }]}>Filter</ThemedText>
               {activeFilterCount > 0 && (
                 <View style={[styles.badge, { backgroundColor: colors.accent, borderColor: colors.text }]}>
@@ -234,44 +237,42 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     paddingHorizontal: Spacing.four,
     paddingBottom: Spacing.two,
   },
-  greeting: { marginBottom: 2 },
+  greeting: { marginBottom: 4 },
   headerIcons: {
     flexDirection: 'row',
     gap: 10,
     alignItems: 'center',
+    paddingBottom: 4,
   },
   iconBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: ms(44),
+    height: ms(44),
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.05)',
   },
   notifDot: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    top: ms(10),
+    right: ms(10),
+    width: ms(8),
+    height: ms(8),
+    borderRadius: ms(4),
   },
   filterBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    paddingHorizontal: 16,
-    height: 44,
+    paddingHorizontal: ms(16),
+    height: vs(44),
     borderRadius: Radius.full,
   },
   filterText: {
     fontWeight: '800',
-    fontSize: 13,
+    fontSize: Typography.caption,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },

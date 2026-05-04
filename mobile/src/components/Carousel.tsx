@@ -1,10 +1,12 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, FlatList, Dimensions, StyleSheet, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from './Themed';
-import { Spacing, Colors } from '@/constants/theme';
+import { Spacing, Colors, Typography } from '@/constants/theme';
+import { nf, ms, vs } from '@/utils/responsive';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const CARD_WIDTH = SCREEN_WIDTH - (Spacing.four * 2);
 
 export interface CarouselItem {
   id: string;
@@ -20,17 +22,31 @@ interface CarouselProps {
 
 export function Carousel({ items }: CarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const flatListRef = useRef<FlatList>(null);
+  const theme  = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
+
+  useEffect(() => {
+    if (!items || items.length === 0) return;
+    const timer = setInterval(() => {
+      const nextIndex = (activeIndex + 1) % items.length;
+      flatListRef.current?.scrollToOffset({
+        offset: nextIndex * CARD_WIDTH,
+        animated: true,
+      });
+      setActiveIndex(nextIndex);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [activeIndex, items.length]);
 
   const renderItem = ({ item }: { item: CarouselItem }) => (
     <View style={styles.cardContainer}>
       <ThemedView variant="element" style={styles.card}>
         <View style={[styles.iconContainer, { backgroundColor: (item.iconColor || colors.primary) + '15' }]}>
-          <Ionicons name={item.icon} size={32} color={item.iconColor || colors.primary} />
+          <Ionicons name={item.icon} size={nf(32)} color={item.iconColor || colors.primary} />
         </View>
         <ThemedText type="subtitle" style={styles.title}>{item.title}</ThemedText>
-        <ThemedText style={styles.description}>{item.description}</ThemedText>
+        <ThemedText style={styles.description} numberOfLines={2}>{item.description}</ThemedText>
       </ThemedView>
     </View>
   );
@@ -38,14 +54,15 @@ export function Carousel({ items }: CarouselProps) {
   return (
     <View style={styles.container}>
       <FlatList
+        ref={flatListRef}
         data={items}
         renderItem={renderItem}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={(e) => {
-          const index = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-          setActiveIndex(index);
+          const index = Math.round(e.nativeEvent.contentOffset.x / CARD_WIDTH);
+          if (index !== activeIndex) setActiveIndex(index);
         }}
         keyExtractor={(item) => item.id}
       />
@@ -66,16 +83,16 @@ export function Carousel({ items }: CarouselProps) {
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: Spacing.four,
+    marginTop: Spacing.four,
+    marginBottom: Spacing.one,
   },
   cardContainer: {
-    width: SCREEN_WIDTH,
-    paddingHorizontal: Spacing.four,
+    width: CARD_WIDTH,
   },
   card: {
-    padding: Spacing.four,
-    borderRadius: 24,
-    minHeight: 180,
+    padding: Spacing.three,
+    borderRadius: ms(20),
+    minHeight: vs(140),
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -85,9 +102,9 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   iconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
+    width: ms(52),
+    height: ms(52),
+    borderRadius: ms(14),
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: Spacing.two,
@@ -98,7 +115,10 @@ const styles = StyleSheet.create({
   },
   description: {
     textAlign: 'center',
-    opacity: 0.8,
+    opacity: 0.6,
+    fontSize: Typography.small,
+    lineHeight: Typography.small * 1.4,
+    paddingHorizontal: Spacing.two,
   },
   pagination: {
     flexDirection: 'row',
@@ -107,8 +127,8 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: ms(8),
+    height: ms(8),
+    borderRadius: ms(4),
   },
 });

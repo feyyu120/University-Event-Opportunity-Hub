@@ -35,7 +35,7 @@ export default function SavedScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  const HEADER_HEIGHT = 70;
+  const HEADER_HEIGHT = 100;
 
   const handleDelete = (id: string) => {
     haptic.selection();
@@ -55,7 +55,10 @@ export default function SavedScreen() {
             <ThemedText type="title">Saved</ThemedText>
             <ThemedText type="small">{items.length} items collected</ThemedText>
           </View>
-          <TouchableOpacity style={[styles.exportBtn, { backgroundColor: colors.primary + '15' }]}>
+          <TouchableOpacity 
+            style={[styles.exportBtn, { backgroundColor: colors.primary + '15' }]}
+            onPress={() => haptic.light()}
+          >
             <ThemedText style={[styles.exportText, { color: colors.primary }]}>Export CSV</ThemedText>
           </TouchableOpacity>
         </View>
@@ -131,8 +134,9 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     paddingHorizontal: Spacing.four,
+    paddingBottom: Spacing.four,
   },
   exportBtn: {
     paddingHorizontal: 16,

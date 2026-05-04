@@ -17,6 +17,7 @@ export interface AuthUser {
   university: string;
   department: string;
   year: string;
+  created_at: string;
 }
 
 export interface LoginPayload {
@@ -28,6 +29,7 @@ export interface RegisterPayload {
   full_name: string;
   email: string;
   password: string;
+  university?: string;
   university_id?: number;
   department?: string;
   year?: string;

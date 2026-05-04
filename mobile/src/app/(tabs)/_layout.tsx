@@ -5,6 +5,7 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, Shadows } from '@/constants/theme';
 import { haptic } from '@/utils/hapticHelper';
+import { vs, ms } from '@/utils/responsive';
 
 export default function TabLayout() {
   const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
@@ -43,10 +44,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="search"
         options={{
-          title: 'Search',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'search' : 'search-outline'} size={24} color={color} />
-          ),
+          href: null,
         }}
       />
       <Tabs.Screen
@@ -70,10 +68,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="notifications"
         options={{
-          title: 'Inbox',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'notifications' : 'notifications-outline'} size={24} color={color} />
-          ),
+          href: null,
         }}
       />
       <Tabs.Screen
@@ -91,20 +86,12 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    position: 'absolute',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.1)',
-    elevation: 0, // Remove Android shadow
-    backgroundColor: 'transparent',
-    height: Platform.OS === 'ios' ? 88 : 68,
-    paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+
   },
   tabBarLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: -4,
+
   },
   tabBarIcon: {
-    marginTop: 4,
+
   },
 });

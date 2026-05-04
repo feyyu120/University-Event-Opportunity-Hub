@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, SafeAreaView, TouchableOpacity, Modal, FlatList, useColorScheme, Platform } from 'react-native';
+import { StyleSheet, View, SafeAreaView, TouchableOpacity, Modal, FlatList, useColorScheme, Platform, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
 import { Carousel, CarouselItem } from '@/components/Carousel';
-import { Spacing, Colors, Radius, Shadows } from '@/constants/theme';
+import { Spacing, Colors, Radius, Shadows, Typography } from '@/constants/theme';
+import { nf, vs, ms } from '@/utils/responsive';
 
 const VALUE_PROPS: CarouselItem[] = [
   {
@@ -31,12 +32,54 @@ const VALUE_PROPS: CarouselItem[] = [
 ];
 
 const UNIVERSITIES = [
-  'Harvard University',
-  'Stanford University',
-  'MIT',
-  'University of Oxford',
-  'University of Cambridge',
-  'Other (Request Addition)',
+  'Adama Science and Technology University',
+  'Addis Ababa Science and Technology University',
+  'Addis Ababa University',
+  'Adigrat University',
+  'Aksum University',
+  'Ambo University',
+  'Arba Minch University',
+  'Arsi University',
+  'Assosa University',
+  'Bahir Dar University',
+  'Bonga University',
+  'Borena University',
+  'Bule Hora University',
+  'Debark University',
+  'Debre Berhan University',
+  'Debre Markos University',
+  'Debre Tabor University',
+  'Dembi Dolo University',
+  'Dilla University',
+  'Dire Dawa University',
+  'Ethiopian Civil Service University',
+  'Ethiopian Police University',
+  'Gambella University',
+  'Haramaya University',
+  'Hawassa University',
+  'Injibara University',
+  'Jijiga University',
+  'Jimma University',
+  'Jinka University',
+  'Kebri Dehar University',
+  'Kotebe Education University',
+  'Madda Walabu University',
+  'Mekdela Amba University',
+  'Mekelle University',
+  'Mettu University',
+  'Mizan-Tepi University',
+  'Oromia State University',
+  'Raya University',
+  'Samara University',
+  'Selale University',
+  'University of Gondar',
+  'Wachemo University',
+  'Werabe University',
+  'Woldia University',
+  'Wolaita Sodo University',
+  'Wollega University',
+  'Wolkite University',
+  'Wollo University',
 ];
 
 export default function WelcomeScreen() {
@@ -45,70 +88,104 @@ export default function WelcomeScreen() {
   const colors = Colors[theme];
   const [selectedUniversity, setSelectedUniversity] = useState(UNIVERSITIES[0]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredUniversities = UNIVERSITIES.filter(uni =>
+    uni.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.header}>
-          <ThemedText type="label" style={styles.topLabel}>WELCOME TO</ThemedText>
-          <ThemedText type="title" style={styles.brand}>Steam</ThemedText>
-          <ThemedText style={styles.tagline}>Unlock your university potential with curated opportunities.</ThemedText>
-        </View>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <ThemedText type="label" style={styles.topLabel}>WELCOME TO</ThemedText>
+            <ThemedText type="h1" style={styles.brand}>CampusEvent</ThemedText>
+          </View>
 
-        <Carousel items={VALUE_PROPS} />
+          <Carousel items={VALUE_PROPS} />
 
-        <View style={styles.form}>
-          <ThemedText type="label" style={styles.label}>SELECT YOUR UNIVERSITY</ThemedText>
-          <TouchableOpacity 
-            style={[styles.dropdown, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]} 
-            onPress={() => setIsModalVisible(true)}
-          >
-            <ThemedText style={styles.uniText}>{selectedUniversity}</ThemedText>
-            <Ionicons name="chevron-down" size={18} color={colors.textSecondary} />
-          </TouchableOpacity>
-
-          <View style={styles.buttonGroup}>
-            <ThemedButton 
-              title="Get Started" 
-              onPress={() => router.push('/(auth)/verification')} 
-            />
-            <View style={styles.rowActions}>
-              <TouchableOpacity style={styles.ghostBtn} onPress={() => router.push('/(auth)/login')}>
-                <ThemedText style={styles.ghostText}>Login</ThemedText>
+          <View style={styles.footer}>
+            <View style={styles.dropdownContainer}>
+              <ThemedText type="label" style={styles.label}>YOUR UNIVERSITY</ThemedText>
+              <TouchableOpacity
+                style={[styles.dropdown, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
+                onPress={() => setIsModalVisible(true)}
+              >
+                <View style={styles.dropdownContent}>
+                  <Ionicons name="school-outline" size={20} color={colors.primary} style={styles.dropdownIcon} />
+                  <ThemedText style={styles.uniText} numberOfLines={1}>{selectedUniversity}</ThemedText>
+                </View>
+                <Ionicons name="chevron-down" size={18} color={colors.textSecondary} />
               </TouchableOpacity>
-              <View style={styles.divider} />
-              <TouchableOpacity style={styles.ghostBtn} onPress={() => router.replace('/(tabs)')}>
-                <ThemedText style={styles.ghostText}>Browse as Guest</ThemedText>
-              </TouchableOpacity>
+            </View>
+
+            <View style={styles.buttonGroup}>
+              <ThemedButton
+                title="Get Started"
+                onPress={() => router.push('/(auth)/verification')}
+              />
+              <View style={styles.rowActions}>
+                <TouchableOpacity style={styles.ghostBtn} onPress={() => router.push('/(auth)/login')}>
+                  <ThemedText style={styles.ghostText}>Sign In</ThemedText>
+                </TouchableOpacity>
+                <View style={styles.divider} />
+                <TouchableOpacity style={styles.ghostBtn} onPress={() => router.replace('/(tabs)')}>
+                  <ThemedText style={styles.ghostText}>Explore as Guest</ThemedText>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
 
-        <Modal visible={isModalVisible} animationType="fade" transparent>
+        <Modal visible={isModalVisible} animationType="slide" transparent>
           <View style={styles.modalOverlay}>
-            <ThemedView variant="element" style={[styles.modalContent, Shadows.medium]}>
+            <ThemedView variant="element" style={[styles.modalContent, Shadows.premium]}>
               <View style={styles.modalHeader}>
-                <ThemedText type="subtitle">Select University</ThemedText>
+                <View>
+                  <ThemedText type="subtitle">Select University</ThemedText>
+                  <ThemedText type="caption">Choose your current institution</ThemedText>
+                </View>
                 <TouchableOpacity onPress={() => setIsModalVisible(false)} style={styles.closeCircle}>
-                  <Ionicons name="close" size={18} color={colors.text} />
+                  <Ionicons name="close" size={20} color={colors.text} />
                 </TouchableOpacity>
               </View>
+
+              <View style={[styles.searchBar, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                <Ionicons name="search-outline" size={18} color={colors.textSecondary} />
+                <TextInput
+                  style={[styles.searchInput, { color: colors.text }]}
+                  placeholder="Search universities..."
+                  placeholderTextColor={colors.textSecondary}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+              </View>
+
               <FlatList
-                data={UNIVERSITIES}
+                data={filteredUniversities}
                 renderItem={({ item }) => (
-                  <TouchableOpacity 
-                    style={styles.uniItem} 
+                  <TouchableOpacity
+                    style={[
+                      styles.uniItem,
+                      item === selectedUniversity && { backgroundColor: colors.primary + '10', borderRadius: 12 }
+                    ]}
                     onPress={() => {
                       setSelectedUniversity(item);
                       setIsModalVisible(false);
+                      setSearchQuery('');
                     }}
                   >
-                    <ThemedText style={styles.uniItemText}>{item}</ThemedText>
-                    {item === selectedUniversity && <Ionicons name="checkmark" size={20} color={colors.primary} />}
+                    <ThemedText style={[
+                      styles.uniItemText,
+                      item === selectedUniversity && { color: colors.primary, fontWeight: '700' }
+                    ]}>{item}</ThemedText>
+                    {item === selectedUniversity && <Ionicons name="checkmark-circle" size={22} color={colors.primary} />}
                   </TouchableOpacity>
                 )}
                 keyExtractor={(item) => item}
                 showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.listContent}
               />
             </ThemedView>
           </View>
@@ -124,112 +201,142 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+  },
+  content: {
+    flex: 1,
     paddingHorizontal: Spacing.four,
   },
   header: {
-    marginTop: Spacing.six,
+    marginTop: Spacing.four,
     alignItems: 'center',
-    marginBottom: Spacing.two,
+    marginBottom: Spacing.one,
   },
+
   topLabel: {
-    letterSpacing: 2,
+    letterSpacing: 3,
     marginBottom: 4,
+    marginTop: 50,
+    opacity: 0.5,
+    fontSize: 10,
   },
   brand: {
-    fontSize: 64,
-    color: '#6366F1', // Primary
+    fontSize: nf(42),
+    color: '#6366F1',
     fontWeight: '900',
-    letterSpacing: -2,
+    letterSpacing: -1.5,
+    lineHeight: nf(50),
   },
-  tagline: {
-    opacity: 0.6,
-    textAlign: 'center',
-    marginTop: Spacing.one,
-    paddingHorizontal: Spacing.four,
+
+  footer: {
+    marginTop: Spacing.two,
+    marginBottom: Spacing.eight,
   },
-  form: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    marginBottom: Spacing.six,
+  dropdownContainer: {
+    marginBottom: Spacing.four,
   },
   label: {
-    marginBottom: Spacing.two,
+    marginBottom: Spacing.one,
+    marginLeft: 4,
   },
   dropdown: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: Spacing.four,
+    padding: Spacing.three,
+    paddingHorizontal: Spacing.four,
     borderRadius: Radius.large,
     borderWidth: 1.5,
-    marginBottom: Spacing.six,
+    minHeight: vs(56),
+  },
+  dropdownContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  dropdownIcon: {
+    marginRight: Spacing.two,
   },
   uniText: {
     fontSize: 16,
     fontWeight: '600',
+    flex: 1,
   },
   buttonGroup: {
-    gap: Spacing.four,
+    gap: Spacing.three,
   },
   rowActions: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 16,
   },
   ghostBtn: {
-    paddingVertical: 8,
+    paddingVertical: Spacing.two,
   },
   ghostText: {
-    fontSize: 15,
-    fontWeight: '600',
-    opacity: 0.7,
+    fontSize: Typography.small,
+    fontWeight: '700',
+    color: '#6366F1',
   },
   divider: {
     width: 1,
-    height: 16,
+    height: 14,
     backgroundColor: 'rgba(0,0,0,0.1)',
+    marginHorizontal: Spacing.three,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(15, 23, 42, 0.4)',
-    justifyContent: 'center',
-    padding: Spacing.six,
+    backgroundColor: 'rgba(2, 6, 23, 0.7)',
+    justifyContent: 'flex-end',
   },
   modalContent: {
-    borderRadius: Radius.xl,
+    borderTopLeftRadius: Radius.xl,
+    borderTopRightRadius: Radius.xl,
     padding: Spacing.four,
-    maxHeight: '70%',
-    ...Platform.select({
-      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 20 }, shadowOpacity: 0.2, shadowRadius: 30 },
-    }),
+    height: '85%',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.four,
-    paddingBottom: Spacing.two,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
   },
   closeCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: 'rgba(0,0,0,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.three,
+    height: 50,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: Spacing.three,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: Spacing.two,
+    fontSize: 16,
+  },
+  listContent: {
+    paddingBottom: Spacing.eight,
+  },
   uniItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: Spacing.four,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.03)',
+    alignItems: 'center',
+    paddingVertical: Spacing.three,
+    paddingHorizontal: Spacing.three,
+    marginVertical: 2,
   },
   uniItemText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
+    flex: 1,
+    marginRight: Spacing.two,
   },
 });
