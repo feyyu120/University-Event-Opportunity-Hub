@@ -47,14 +47,14 @@ export interface AuthResponse {
 
 export const authApi = {
   login: (payload: LoginPayload) =>
-    apiClient.post<AuthResponse>('auth/login.php', payload),
+    apiClient.post<AuthResponse>('auth/login', payload),
 
   register: (payload: RegisterPayload) =>
-    apiClient.post<AuthResponse>('auth/register.php', payload),
+    apiClient.post<AuthResponse>('auth/register', payload),
 
   logout: () =>
-    apiClient.post<{ message: string }>('auth/logout.php', {}),
+    apiClient.post<{ message: string }>('auth/logout', {}),
 
   checkAuthorization: () =>
-    apiClient.get<{ authorized: boolean; user?: AuthUser }>('auth/check_autorization.php'),
+    apiClient.get<{ authorized: boolean; user?: AuthUser }>('auth/autorize'),
 };

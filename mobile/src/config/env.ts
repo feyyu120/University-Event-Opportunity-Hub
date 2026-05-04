@@ -6,8 +6,8 @@
  */
 
 // Expo tunnel / ngrok / LAN IP — change this per environment
-const DEV_API_URL = 'http://192.168.1.100:8000/api'; // ← Update this
-const PROD_API_URL = 'https://your-domain.com/api';    // ← Update this
+const DEV_API_URL = 'https://astu-event-center-backend.onrender.com';
+const PROD_API_URL = 'https://astu-event-center-backend.onrender.com';
 
 export const ENV = {
   API_BASE_URL: __DEV__ ? DEV_API_URL : PROD_API_URL,

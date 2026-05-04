@@ -584,9 +584,9 @@ $admin_id = Guard::checkAccess();
 </div>
 
 <script>
-const API_BASE = window.location.hostname === "localhost" 
-    ? "http://localhost/University-Event-Opportunity-Hub/backend/" 
-    : "https://astu-event-center-backend.onrender.com/";
+const API_URL = window.location.hostname === "localhost" 
+    ? "http://localhost/University-Event-Opportunity-Hub/backend/admin" 
+    : "https://astu-event-center-backend.onrender.com/admin";
 
 // Toast notification system
 function showToast(message, type = 'success') {

@@ -94,20 +94,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Actions ──
   const login = useCallback(async (payload: LoginPayload) => {
-    // DEV MODE MOCK: Bypassing real API since backend is not finished.
-    // Replace this block with actual API call later:
-    // const res = await authApi.login(payload);
-    const mockUser: AuthUser = {
-      id: 999,
-      email: payload.email,
-      full_name: payload.email.split('@')[0].replace('.', ' '),
-      university: 'Steam University',
-      department: 'Computer Science',
-      year: 'Senior',
-      created_at: new Date().toISOString()
-    };
-    const token = 'mock_dev_token_12345';
-    await persistSession(mockUser, token);
+    try {
+      const res = await authApi.login(payload);
+      const token = res.token ?? 'session_token';
+      await persistSession(res.user, token);
+    } catch (apiErr) {
+      throw apiErr;
+    }
   }, [persistSession]);
 
   const register = useCallback(async (payload: RegisterPayload) => {
@@ -116,22 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const token = res.token ?? 'session_token';
       await persistSession(res.user, token);
     } catch (apiErr) {
-      if (ENV.IS_DEV) {
-        // Fallback mock in dev mode when backend is offline
-        const mockUser: AuthUser = {
-          id: 888,
-          email: payload.email,
-          full_name: payload.full_name || 'New Student',
-          university: payload.university || '',
-          department: payload.department || 'Undecided',
-          year: payload.year || 'Freshman',
-          created_at: new Date().toISOString(),
-          role: 'student',
-        };
-        await persistSession(mockUser, 'mock_dev_token_67890');
-      } else {
-        throw apiErr;
-      }
+      throw apiErr;
     }
   }, [persistSession]);
 
