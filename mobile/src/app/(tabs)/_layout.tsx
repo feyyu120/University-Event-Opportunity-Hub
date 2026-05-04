@@ -91,12 +91,20 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-
+    position: 'absolute',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+    elevation: 0, // Remove Android shadow
+    backgroundColor: 'transparent',
+    height: Platform.OS === 'ios' ? 88 : 68,
+    paddingBottom: Platform.OS === 'ios' ? 28 : 8,
   },
   tabBarLabel: {
-
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: -4,
   },
   tabBarIcon: {
-
+    marginTop: 4,
   },
 });
