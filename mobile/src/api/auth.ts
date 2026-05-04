@@ -18,6 +18,8 @@ export interface AuthUser {
   department: string;
   year: string;
   created_at: string;
+  bio?: string;
+  profile_image?: string;
 }
 
 export interface LoginPayload {

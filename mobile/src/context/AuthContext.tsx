@@ -90,7 +90,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       SecureStore.deleteItemAsync(TOKEN_KEY),
       SecureStore.deleteItemAsync(USER_KEY),
     ]);
-    setState({ user: null, token: null, isLoading: false, isAuthenticated: false });
   }, []);
 
   // ── Actions ──
@@ -137,15 +136,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [persistSession]);
 
   const logout = useCallback(async () => {
-    try { await authApi.logout(); } catch { /* ignore network errors on logout */ }
-    await clearSession();
+    // 1. Immediately update UI state for instant perception of speed
+    setState({ user: null, token: null, isLoading: false, isAuthenticated: false });
+    
+    // 2. Fire and forget cleanup tasks in the background
+    authApi.logout().catch(() => {});
+    clearSession().catch(() => {});
   }, [clearSession]);
 
   const updateUser = useCallback((partial: Partial<AuthUser>) => {
-    setState(s => ({
-      ...s,
-      user: s.user ? { ...s.user, ...partial } : null,
-    }));
+    setState(s => {
+      if (!s.user) return s;
+      const updatedUser = { ...s.user, ...partial };
+      // Persist locally so it survives restarts
+      SecureStore.setItemAsync(USER_KEY, JSON.stringify(updatedUser)).catch(() => {});
+      return { ...s, user: updatedUser };
+    });
   }, []);
 
   return (

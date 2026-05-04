@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, FlatList, TouchableOpacity, ActivityIndicator, SafeAreaView, useColorScheme } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { StyleSheet, View, TextInput, TouchableOpacity, ActivityIndicator, SafeAreaView, useColorScheme } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from '@/components/Themed';
@@ -25,6 +26,17 @@ export default function SearchScreen() {
   const handleSearch = (text: string) => {
     setQuery(text);
   };
+
+  const renderItem = useCallback(({ item }: { item: any }) => (
+    <TouchableOpacity activeOpacity={0.9} onPress={() => router.push(`/opportunity/${item.id}`)}>
+      <OpportunityCard 
+        item={{ ...item, saved: item.is_saved, saveCount: item.save_count }} 
+        onBookmark={toggleSave} 
+        onApply={() => router.push(`/opportunity/${item.id}`)} 
+        onShowReason={() => {}} 
+      />
+    </TouchableOpacity>
+  ), [router, toggleSave]);
 
   return (
     <ThemedView style={styles.container}>
@@ -76,21 +88,15 @@ export default function SearchScreen() {
                 <ThemedText style={styles.loadingText}>Searching for opportunities...</ThemedText>
               </View>
             ) : results.length > 0 ? (
-              <FlatList
-                data={results}
-                renderItem={({ item }) => (
-                  <TouchableOpacity activeOpacity={0.9} onPress={() => router.push(`/opportunity/${item.id}`)}>
-                    <OpportunityCard 
-                      item={{ ...item, saved: item.is_saved, saveCount: item.save_count }} 
-                      onBookmark={toggleSave} 
-                      onApply={() => router.push(`/opportunity/${item.id}`)} 
-                      onShowReason={() => {}} 
-                    />
-                  </TouchableOpacity>
-                )}
-                keyExtractor={item => item.id}
-                contentContainerStyle={styles.listContent}
-              />
+              <View style={{ flex: 1 }}>
+                <FlashList
+                  data={results}
+                  renderItem={renderItem}
+                  keyExtractor={item => item.id}
+                  contentContainerStyle={styles.listContent}
+                  estimatedItemSize={220}
+                />
+              </View>
             ) : (
               <View style={styles.center}>
                 <Ionicons name="search" size={48} color={colors.textSecondary} style={{ marginBottom: 16 }} />

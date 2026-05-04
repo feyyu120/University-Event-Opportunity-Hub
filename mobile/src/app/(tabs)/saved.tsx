@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, FlatList, TouchableOpacity, useColorScheme, ActivityIndicator } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { StyleSheet, View, TouchableOpacity, useColorScheme, ActivityIndicator } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -50,6 +51,17 @@ export default function SavedScreen() {
     toggleSave(id);
   };
 
+  const renderItem = useCallback(({ item }: { item: any }) => (
+    <TouchableOpacity activeOpacity={0.9} onPress={() => router.push(`/opportunity/${item.id}`)}>
+      <OpportunityCard 
+        item={{ ...item, saved: item.is_saved, saveCount: item.save_count }} 
+        onBookmark={handleDelete} 
+        onApply={() => router.push(`/opportunity/${item.id}`)} 
+        onShowReason={() => {}} 
+      />
+    </TouchableOpacity>
+  ), [router, handleDelete]);
+
   return (
     <ThemedView style={styles.container}>
       {/* ── Glassmorphic Header ── */}
@@ -82,22 +94,16 @@ export default function SavedScreen() {
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : items.length > 0 ? (
-        <FlatList
-          data={items}
-          renderItem={({ item }) => (
-            <TouchableOpacity activeOpacity={0.9} onPress={() => router.push(`/opportunity/${item.id}`)}>
-              <OpportunityCard 
-                item={{ ...item, saved: item.is_saved, saveCount: item.save_count }} 
-                onBookmark={handleDelete} 
-                onApply={() => router.push(`/opportunity/${item.id}`)} 
-                onShowReason={() => {}} 
-              />
-            </TouchableOpacity>
-          )}
-          keyExtractor={item => item.id}
-          contentContainerStyle={[styles.listContent, { paddingTop: insets.top + HEADER_HEIGHT + 60 }]}
-          showsVerticalScrollIndicator={false}
-        />
+        <View style={{ flex: 1 }}>
+          <FlashList
+            data={items}
+            renderItem={renderItem}
+            keyExtractor={item => item.id}
+            contentContainerStyle={[styles.listContent, { paddingTop: insets.top + HEADER_HEIGHT + 60 }]}
+            showsVerticalScrollIndicator={false}
+            estimatedItemSize={220}
+          />
+        </View>
       ) : (
         <View style={[styles.emptyState, { paddingTop: insets.top + HEADER_HEIGHT }]}>
           <Ionicons name="bookmark-outline" size={64} color={colors.textSecondary} style={{ marginBottom: 16 }} />

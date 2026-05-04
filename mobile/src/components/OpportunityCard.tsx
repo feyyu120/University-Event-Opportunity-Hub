@@ -1,5 +1,6 @@
-import React from 'react';
-import { StyleSheet, View, Image, TouchableOpacity, useColorScheme } from 'react-native';
+import React, { memo } from 'react';
+import { StyleSheet, View, TouchableOpacity, useColorScheme } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from './Themed';
 import { Spacing, Colors, Radius, Shadows, Typography } from '@/constants/theme';
@@ -36,7 +37,7 @@ const TYPE_CONFIG: Record<OpportunityType, { icon: keyof typeof Ionicons.glyphMa
   Hackathon:  { icon: 'rocket',    color: '#EC4899' },
 };
 
-export function OpportunityCard({ item, onBookmark, onApply, onShowReason }: OpportunityCardProps) {
+export const OpportunityCard = memo(function OpportunityCard({ item, onBookmark, onApply, onShowReason }: OpportunityCardProps) {
   const theme  = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
   const config = TYPE_CONFIG[item.type];
@@ -45,7 +46,13 @@ export function OpportunityCard({ item, onBookmark, onApply, onShowReason }: Opp
     <ThemedView style={[styles.card, Shadows.soft, { backgroundColor: colors.backgroundElement }]}>
       <View style={styles.imageSection}>
         {item.image ? (
-          <Image source={{ uri: item.image }} style={styles.image} />
+          <Image 
+            source={item.image} 
+            style={styles.image} 
+            contentFit="cover"
+            transition={200}
+            cachePolicy="memory-disk"
+          />
         ) : (
           <View style={[styles.imageFallback, { backgroundColor: config.color + '20' }]}>
             <Ionicons name={config.icon} size={nf(40)} color={config.color} />
@@ -108,7 +115,7 @@ export function OpportunityCard({ item, onBookmark, onApply, onShowReason }: Opp
       </View>
     </ThemedView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

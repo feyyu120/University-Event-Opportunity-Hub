@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, TouchableOpacity, Switch, useColorScheme, Image } from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity, Switch, useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
 import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
+import { SettingsModal } from '@/components/SettingsModal';
 import { Spacing, Colors, Radius, Shadows, Typography } from '@/constants/theme';
 import { haptic } from '@/utils/hapticHelper';
 import { nf, vs, ms } from '@/utils/responsive';
@@ -18,6 +20,7 @@ export default function ProfileScreen() {
   const { user, isAuthenticated, logout } = useAuth();
 
   const [notifs, setNotifs] = useState({ match: true, deadline: true, status: true });
+  const [settingsVisible, setSettingsVisible] = useState(false);
 
   const HEADER_HEIGHT = vs(100);
 
@@ -62,7 +65,7 @@ export default function ProfileScreen() {
             <ThemedText type="title">Profile</ThemedText>
             <ThemedText type="small">Manage your account</ThemedText>
           </View>
-          <TouchableOpacity onPress={() => haptic.light()} accessibilityRole="button">
+          <TouchableOpacity onPress={() => { haptic.light(); setSettingsVisible(true); }} accessibilityRole="button">
             <Ionicons name="settings-outline" size={nf(24)} color={colors.text} />
           </TouchableOpacity>
         </View>
@@ -73,17 +76,21 @@ export default function ProfileScreen() {
         {/* ── Avatar Section ── */}
         <View style={styles.avatarSection}>
           <View style={[styles.avatarContainer, Shadows.medium]}>
-            <View style={[styles.avatarFallback, { backgroundColor: colors.primary + '20', borderColor: colors.backgroundElement }]}>
-              <ThemedText style={[styles.avatarInitial, { color: colors.primary }]}>
-                {user.full_name?.charAt(0).toUpperCase() || 'U'}
-              </ThemedText>
-            </View>
-            <TouchableOpacity style={[styles.editBadge, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]} onPress={() => haptic.light()}>
+            {user.profile_image ? (
+              <Image source={{ uri: user.profile_image }} style={styles.avatarImage} contentFit="cover" />
+            ) : (
+              <View style={[styles.avatarFallback, { backgroundColor: colors.primary + '20', borderColor: colors.backgroundElement }]}>
+                <ThemedText style={[styles.avatarInitial, { color: colors.primary }]}>
+                  {user.full_name?.charAt(0).toUpperCase() || 'U'}
+                </ThemedText>
+              </View>
+            )}
+            <TouchableOpacity style={[styles.editBadge, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]} onPress={() => { haptic.light(); setSettingsVisible(true); }}>
               <Ionicons name="pencil" size={nf(14)} color={colors.primary} />
             </TouchableOpacity>
           </View>
           <ThemedText type="title" style={styles.name}>{user.full_name}</ThemedText>
-          <ThemedText style={styles.bio}>{user.department} • {user.university}</ThemedText>
+          <ThemedText style={styles.bio}>{user.bio ? user.bio : `${user.department} • ${user.university}`}</ThemedText>
         </View>
 
         <View style={styles.body}>
@@ -143,20 +150,10 @@ export default function ProfileScreen() {
               isLast
             />
           </ThemedView>
-
-          {/* ── Account Actions ── */}
-          <ThemedText type="label" style={styles.sectionLabel}>ACCOUNT</ThemedText>
-          <ThemedView variant="element" style={styles.card}>
-            <ActionRow label="Privacy Settings" icon="lock-closed-outline" />
-            <ActionRow label="Export My Data" icon="download-outline" />
-            <ActionRow label="Sign Out" icon="log-out-outline" isLast color={colors.accent} onPress={handleLogout} />
-          </ThemedView>
-
-          <TouchableOpacity style={styles.deleteBtn}>
-            <ThemedText style={styles.deleteText}>Delete Account Permanently</ThemedText>
-          </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <SettingsModal visible={settingsVisible} onClose={() => setSettingsVisible(false)} />
     </ThemedView>
   );
 }
@@ -234,6 +231,13 @@ const styles = StyleSheet.create({
   avatarContainer: {
     position: 'relative',
     marginBottom: Spacing.three,
+  },
+  avatarImage: {
+    width: ms(110),
+    height: ms(110),
+    borderRadius: ms(55),
+    borderWidth: 4,
+    borderColor: 'transparent',
   },
   avatarFallback: {
     width: ms(110),

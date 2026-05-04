@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, FlatList, TouchableOpacity, useColorScheme, ActivityIndicator } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { StyleSheet, View, TouchableOpacity, useColorScheme, ActivityIndicator } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -51,6 +52,21 @@ export default function ApplicationsScreen() {
     );
   }
 
+  const renderItem = useCallback(({ item }: { item: any }) => (
+    <ThemedView variant="element" style={styles.appCard}>
+      <View style={styles.cardInfo}>
+        <ThemedText type="defaultSemiBold">{item.title}</ThemedText>
+        <ThemedText style={styles.orgText}>{item.organization}</ThemedText>
+        <ThemedText style={styles.dateText}>Applied on {item.deadline}</ThemedText>
+      </View>
+      <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor((item as any).status || 'Applied')}20` }]}>
+        <ThemedText style={{ color: getStatusColor((item as any).status || 'Applied'), fontSize: Typography.caption, fontWeight: '700' }}>
+          {((item as any).status || 'Applied').toUpperCase()}
+        </ThemedText>
+      </View>
+    </ThemedView>
+  ), [getStatusColor]);
+
   return (
     <ThemedView style={styles.container}>
       {/* ── Glassmorphic Header ── */}
@@ -86,25 +102,15 @@ export default function ApplicationsScreen() {
               <ActivityIndicator size="large" color={colors.primary} />
             </View>
           ) : items.length > 0 ? (
-            <FlatList
-              data={items}
-              renderItem={({ item }) => (
-                <ThemedView variant="element" style={styles.appCard}>
-                  <View style={styles.cardInfo}>
-                    <ThemedText type="defaultSemiBold">{item.title}</ThemedText>
-                    <ThemedText style={styles.orgText}>{item.organization}</ThemedText>
-                    <ThemedText style={styles.dateText}>Applied on {item.deadline}</ThemedText>
-                  </View>
-                <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor((item as any).status || 'Applied')}20` }]}>
-                  <ThemedText style={{ color: getStatusColor((item as any).status || 'Applied'), fontSize: Typography.caption, fontWeight: '700' }}>
-                    {((item as any).status || 'Applied').toUpperCase()}
-                  </ThemedText>
-                </View>
-              </ThemedView>
-            )}
-            keyExtractor={item => item.id}
-            contentContainerStyle={styles.list}
-          />
+            <View style={{ flex: 1 }}>
+              <FlashList
+                data={items}
+                renderItem={renderItem}
+                keyExtractor={item => item.id}
+                contentContainerStyle={styles.list}
+                estimatedItemSize={120}
+              />
+            </View>
           ) : (
             <View style={styles.emptyState}>
               <Ionicons name="document-text-outline" size={nf(48)} color={colors.textSecondary} style={{ marginBottom: 16 }} />
