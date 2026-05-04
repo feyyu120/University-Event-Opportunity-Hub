@@ -19,6 +19,7 @@ import React, {
 import * as SecureStore from 'expo-secure-store';
 import { TOKEN_KEY, USER_KEY, ApiError } from '@/api/client';
 import { authApi, type AuthUser, type LoginPayload, type RegisterPayload } from '@/api/auth';
+import { ENV } from '@/config/env';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -111,18 +112,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [persistSession]);
 
   const register = useCallback(async (payload: RegisterPayload) => {
-    // DEV MODE MOCK: Bypassing real API since backend is not finished.
-    const mockUser: AuthUser = {
-      id: 888,
-      email: payload.email,
-      full_name: payload.full_name || 'New Student',
-      university: payload.university || 'Steam University',
-      department: payload.department || 'Undecided',
-      year: payload.year || 'Freshman',
-      created_at: new Date().toISOString()
-    };
-    const token = 'mock_dev_token_67890';
-    await persistSession(mockUser, token);
+    try {
+      const res = await authApi.register(payload);
+      const token = res.token ?? 'session_token';
+      await persistSession(res.user, token);
+    } catch (apiErr) {
+      if (ENV.IS_DEV) {
+        // Fallback mock in dev mode when backend is offline
+        const mockUser: AuthUser = {
+          id: 888,
+          email: payload.email,
+          full_name: payload.full_name || 'New Student',
+          university: payload.university || '',
+          department: payload.department || 'Undecided',
+          year: payload.year || 'Freshman',
+          created_at: new Date().toISOString(),
+          role: 'student',
+        };
+        await persistSession(mockUser, 'mock_dev_token_67890');
+      } else {
+        throw apiErr;
+      }
+    }
   }, [persistSession]);
 
   const logout = useCallback(async () => {

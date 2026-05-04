@@ -1,40 +1,35 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, SafeAreaView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { StyleSheet, View, SafeAreaView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
-import { Spacing, Colors, Radius, Shadows } from '@/constants/theme';
+import { Spacing, Colors, Radius, Typography } from '@/constants/theme';
+import { nf, vs, ms } from '@/utils/responsive';
 import { useColorScheme } from 'react-native';
-import { authApi } from '@/api/auth';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginScreen() {
-  const router = useRouter();
-  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
-  const colors = Colors[theme];
+  const router  = useRouter();
+  const theme    = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors   = Colors[theme];
+  const { login } = useAuth();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail]           = useState('');
+  const [password, setPassword]     = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading]       = useState(false);
+  const [error, setError]           = useState('');
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password.');
-      return;
-    }
-
+    if (!email.trim()) { setError('Please enter your email.'); return; }
+    if (!password)     { setError('Please enter your password.'); return; }
     setLoading(true);
+    setError('');
     try {
-      const response = await authApi.login({ email, password });
-      if (response.data.user) {
-        // In a real app, you'd save the token/user state here
-        router.replace('/(tabs)');
-      } else {
-        Alert.alert('Login Failed', response.data.message || 'Invalid credentials');
-      }
-    } catch (error: any) {
-      console.error('Login error:', error);
-      Alert.alert('Error', error.response?.data?.message || 'An error occurred during login. Please try again.');
+      await login({ email: email.trim().toLowerCase(), password });
+      router.replace('/(tabs)');
+    } catch (e: any) {
+      setError(e?.message || 'Invalid email or password.');
     } finally {
       setLoading(false);
     }
@@ -42,59 +37,84 @@ export default function LoginScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <SafeAreaView style={styles.safeArea}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <SafeAreaView style={styles.safeArea}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={nf(22)} color={colors.text} />
+            </TouchableOpacity>
 
-          <View style={styles.content}>
             <View style={styles.header}>
               <ThemedText type="h1">Welcome Back</ThemedText>
-              <ThemedText style={styles.subtitle}>Log in to access your opportunities</ThemedText>
+              <ThemedText style={styles.subtitle}>Sign in to access your opportunities</ThemedText>
             </View>
 
             <View style={styles.form}>
+              {/* Email */}
               <View style={styles.inputGroup}>
                 <ThemedText type="label" style={styles.label}>EMAIL ADDRESS</ThemedText>
                 <View style={[styles.inputWrapper, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-                  <Ionicons name="mail-outline" size={20} color={colors.textSecondary} style={styles.inputIcon} />
+                  <Ionicons name="mail-outline" size={nf(20)} color={colors.textSecondary} style={styles.inputIcon} />
                   <TextInput
                     style={[styles.input, { color: colors.text }]}
                     placeholder="name@university.edu"
                     placeholderTextColor={colors.textSecondary}
                     keyboardType="email-address"
                     autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="next"
                     value={email}
-                    onChangeText={setEmail}
+                    onChangeText={v => { setEmail(v); setError(''); }}
+                    allowFontScaling={false}
                   />
                 </View>
               </View>
 
+              {/* Password */}
               <View style={styles.inputGroup}>
                 <ThemedText type="label" style={styles.label}>PASSWORD</ThemedText>
                 <View style={[styles.inputWrapper, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-                  <Ionicons name="lock-closed-outline" size={20} color={colors.textSecondary} style={styles.inputIcon} />
+                  <Ionicons name="lock-closed-outline" size={nf(20)} color={colors.textSecondary} style={styles.inputIcon} />
                   <TextInput
                     style={[styles.input, { color: colors.text }]}
                     placeholder="••••••••"
                     placeholderTextColor={colors.textSecondary}
                     secureTextEntry={!showPassword}
+                    returnKeyType="done"
+                    onSubmitEditing={handleLogin}
                     value={password}
-                    onChangeText={setPassword}
+                    onChangeText={v => { setPassword(v); setError(''); }}
+                    allowFontScaling={false}
                   />
                   <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                    <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color={colors.textSecondary} />
+                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={nf(20)} color={colors.textSecondary} />
                   </TouchableOpacity>
                 </View>
               </View>
 
+              {/* Forgot */}
               <TouchableOpacity style={styles.forgotPassword}>
                 <ThemedText style={styles.forgotPasswordText}>Forgot Password?</ThemedText>
               </TouchableOpacity>
 
-              <ThemedButton 
-                title="Sign In" 
+              {/* Error */}
+              {!!error && (
+                <View style={[styles.errorBox, { backgroundColor: colors.accent + '15', borderColor: colors.accent }]}>
+                  <Ionicons name="alert-circle-outline" size={nf(15)} color={colors.accent} />
+                  <ThemedText style={[styles.errorText, { color: colors.accent }]}>{error}</ThemedText>
+                </View>
+              )}
+
+              <ThemedButton
+                title="Sign In"
                 onPress={handleLogin}
                 loading={loading}
                 style={styles.loginButton}
@@ -102,61 +122,59 @@ export default function LoginScreen() {
 
               <View style={styles.signupPrompt}>
                 <ThemedText style={styles.promptText}>Don't have an account? </ThemedText>
-                <TouchableOpacity onPress={() => router.push('/(auth)/verification')}>
+                <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
                   <ThemedText style={styles.signupLink}>Sign Up</ThemedText>
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
-        </SafeAreaView>
+          </SafeAreaView>
+        </ScrollView>
       </KeyboardAvoidingView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { flex: 1 },
+  scroll: {
+    flexGrow: 1,
+    paddingBottom: vs(40),
   },
   safeArea: {
-    flex: 1,
     paddingHorizontal: Spacing.four,
   },
   backButton: {
-    marginTop: Spacing.two,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    marginTop: vs(56),
+    width: ms(40),
+    height: ms(40),
+    borderRadius: ms(20),
     justifyContent: 'center',
-  },
-  content: {
-    flex: 1,
-    paddingTop: Spacing.six,
+    marginBottom: Spacing.two,
   },
   header: {
-    marginBottom: Spacing.eight,
+    marginBottom: Spacing.five,
   },
   subtitle: {
     opacity: 0.6,
     marginTop: Spacing.one,
-    fontSize: 16,
+    fontSize: Typography.default,
   },
   form: {
-    gap: Spacing.four,
+    gap: Spacing.three,
   },
   inputGroup: {
     gap: Spacing.one,
   },
   label: {
-    fontSize: 12,
+    fontSize: Typography.caption,
     fontWeight: '700',
     marginBottom: 4,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 56,
-    borderRadius: Radius.medium,
+    height: vs(56),
+    borderRadius: Radius.large,
     borderWidth: 1.5,
     paddingHorizontal: Spacing.three,
   },
@@ -165,7 +183,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: Typography.default,
     height: '100%',
   },
   eyeIcon: {
@@ -175,13 +193,26 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   forgotPasswordText: {
-    color: '#6366F1', // Primary
+    color: '#6366F1',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: Typography.small,
+  },
+  errorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: Spacing.three,
+    borderRadius: Radius.medium,
+    borderWidth: 1,
+  },
+  errorText: {
+    fontSize: Typography.small,
+    fontWeight: '600',
+    flex: 1,
   },
   loginButton: {
     marginTop: Spacing.two,
-    height: 56,
+    minHeight: vs(52),
   },
   signupPrompt: {
     flexDirection: 'row',
@@ -190,11 +221,11 @@ const styles = StyleSheet.create({
   },
   promptText: {
     opacity: 0.6,
-    fontSize: 15,
+    fontSize: Typography.body,
   },
   signupLink: {
     color: '#6366F1',
     fontWeight: '700',
-    fontSize: 15,
+    fontSize: Typography.body,
   },
 });

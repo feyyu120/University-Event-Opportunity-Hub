@@ -48,6 +48,8 @@ export interface OpportunityFilters {
   search?: string;
   page?: number;
   per_page?: number;
+  is_saved?: boolean;
+  is_applied?: boolean;
 }
 
 export interface ApplicationStatus {

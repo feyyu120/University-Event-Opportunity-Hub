@@ -1,40 +1,50 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, FlatList, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
-import { ThemedText, ThemedView } from '@/components/Themed';
-import { Spacing, Colors } from '@/constants/theme';
-import { useColorScheme } from 'react-native';
+import { StyleSheet, View, FlatList, TouchableOpacity, SafeAreaView, useColorScheme, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { haptic } from '@/utils/hapticHelper';
-
-interface AppRecord {
-  id: string;
-  title: string;
-  status: 'Applied' | 'Accepted' | 'Rejected' | 'Interviewing';
-  date: string;
-  org: string;
-}
-
-const MOCK_APPS: AppRecord[] = [
-  { id: '1', title: 'Summer Intern', org: 'Google', status: 'Interviewing', date: 'Oct 12' },
-  { id: '2', title: 'Research Assistant', org: 'Physics Dept', status: 'Applied', date: 'Oct 10' },
-  { id: '3', title: 'Tech Talk RSVP', org: 'ACM', status: 'Accepted', date: 'Oct 05' },
-];
+import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
+import { Spacing, Colors, Radius, Typography } from '@/constants/theme';
+import { nf, vs, ms } from '@/utils/responsive';
+import { useAuth } from '@/context/AuthContext';
+import { useOpportunities } from '@/hooks/useOpportunities';
 
 export default function ApplicationsScreen() {
-  const [view, setView] = useState<'List' | 'Calendar'>('List');
-  const colors = Colors[theme];
   const router = useRouter();
-  const HEADER_HEIGHT = 80;
+  const theme  = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
+  const { user, isAuthenticated } = useAuth();
+  const { data: items, loading } = useOpportunities({ is_applied: true });
+  const [view, setView] = useState<'List' | 'Calendar'>('List');
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Accepted': return '#10b981';
-      case 'Rejected': return '#ef4444';
+      case 'Accepted':    return '#10b981';
+      case 'Rejected':    return '#ef4444';
       case 'Interviewing': return '#6366f1';
-      default: return '#64748b';
+      default:            return '#64748b';
     }
   };
+
+  if (!isAuthenticated || !user) {
+    return (
+      <ThemedView style={styles.container}>
+        <View style={styles.unauthContainer}>
+          <View style={styles.unauthIconContainer}>
+            <Ionicons name="document-text" size={nf(80)} color={colors.primary} />
+          </View>
+          <ThemedText type="h1" style={styles.unauthTitle}>Applications</ThemedText>
+          <ThemedText style={styles.unauthSubtitle}>
+            Sign in to track your applications and view your upcoming interviews and deadlines.
+          </ThemedText>
+          <ThemedButton 
+            title="Sign In / Register" 
+            onPress={() => router.push('/(auth)/login')} 
+            style={styles.unauthButton}
+          />
+        </View>
+      </ThemedView>
+    );
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -43,33 +53,37 @@ export default function ApplicationsScreen() {
           <View>
             <ThemedText type="title">My Applications</ThemedText>
             <View style={[styles.toggleContainer, { backgroundColor: colors.backgroundElement }]}>
-              {['List', 'Calendar'].map(v => (
-                <TouchableOpacity 
-                  key={v} 
+              {(['List', 'Calendar'] as const).map(v => (
+                <TouchableOpacity
+                  key={v}
                   style={[styles.toggleBtn, view === v && { backgroundColor: colors.background }]}
-                  onPress={() => setView(v as any)}
+                  onPress={() => setView(v)}
                 >
-                  <ThemedText style={view === v && { fontWeight: '700' }}>{v}</ThemedText>
+                  <ThemedText style={view === v ? { fontWeight: '700' } : undefined}>{v}</ThemedText>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
-          <View style={{ width: 44 }} />
         </View>
 
         {view === 'List' ? (
-          <FlatList
-            data={MOCK_APPS}
-            renderItem={({ item }) => (
-              <ThemedView variant="element" style={styles.appCard}>
-                <View style={styles.cardInfo}>
-                  <ThemedText type="defaultSemiBold">{item.title}</ThemedText>
-                  <ThemedText style={styles.orgText}>{item.org}</ThemedText>
-                  <ThemedText style={styles.dateText}>Applied on {item.date}</ThemedText>
-                </View>
-                <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(item.status)}20` }]}>
-                  <ThemedText style={{ color: getStatusColor(item.status), fontSize: 12, fontWeight: '700' }}>
-                    {item.status.toUpperCase()}
+          loading ? (
+            <View style={styles.emptyState}>
+              <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+          ) : items.length > 0 ? (
+            <FlatList
+              data={items}
+              renderItem={({ item }) => (
+                <ThemedView variant="element" style={styles.appCard}>
+                  <View style={styles.cardInfo}>
+                    <ThemedText type="defaultSemiBold">{item.title}</ThemedText>
+                    <ThemedText style={styles.orgText}>{item.organization}</ThemedText>
+                    <ThemedText style={styles.dateText}>Applied on {item.deadline}</ThemedText>
+                  </View>
+                <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor((item as any).status || 'Applied')}20` }]}>
+                  <ThemedText style={{ color: getStatusColor((item as any).status || 'Applied'), fontSize: Typography.caption, fontWeight: '700' }}>
+                    {((item as any).status || 'Applied').toUpperCase()}
                   </ThemedText>
                 </View>
               </ThemedView>
@@ -77,6 +91,13 @@ export default function ApplicationsScreen() {
             keyExtractor={item => item.id}
             contentContainerStyle={styles.list}
           />
+          ) : (
+            <View style={styles.emptyState}>
+              <Ionicons name="document-text-outline" size={nf(48)} color={colors.textSecondary} style={{ marginBottom: 16 }} />
+              <ThemedText type="subtitle">No applications yet</ThemedText>
+              <ThemedText style={styles.emptySub}>Your submitted applications will appear here.</ThemedText>
+            </View>
+          )
         ) : (
           <View style={styles.calendarContainer}>
             <ThemedText type="subtitle" style={styles.monthTitle}>October 2026</ThemedText>
@@ -86,7 +107,7 @@ export default function ApplicationsScreen() {
                 const hasApp = [5, 10, 12].includes(day);
                 return (
                   <View key={i} style={[styles.dayCell, hasApp && { backgroundColor: colors.primary }]}>
-                    <ThemedText style={hasApp && { color: '#FFF' }}>{day}</ThemedText>
+                    <ThemedText style={hasApp ? { color: '#FFF' } : undefined}>{day}</ThemedText>
                     {hasApp && <View style={styles.dot} />}
                   </View>
                 );
@@ -104,59 +125,51 @@ export default function ApplicationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
     padding: Spacing.four,
     paddingBottom: Spacing.four,
-    minHeight: 120,
+    minHeight: vs(120),
+    justifyContent: 'flex-end',
   },
   toggleContainer: {
     flexDirection: 'row',
-    borderRadius: 12,
-    padding: 4,
+    borderRadius: ms(12),
+    padding: ms(4),
+    marginTop: Spacing.two,
   },
   toggleBtn: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: vs(8),
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: ms(8),
   },
-  list: {
-    padding: Spacing.four,
-  },
+  list: { padding: Spacing.four, paddingBottom: vs(120) },
   appCard: {
     flexDirection: 'row',
     padding: Spacing.four,
-    borderRadius: 20,
+    borderRadius: ms(20),
     marginBottom: Spacing.three,
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  cardInfo: {
-    flex: 1,
-  },
+  cardInfo: { flex: 1 },
   orgText: {
-    fontSize: 14,
+    fontSize: Typography.small,
     opacity: 0.6,
+    marginTop: 2,
   },
   dateText: {
-    fontSize: 12,
+    fontSize: Typography.caption,
     opacity: 0.5,
     marginTop: 4,
   },
   statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingHorizontal: ms(12),
+    paddingVertical: ms(6),
+    borderRadius: ms(8),
   },
-  calendarContainer: {
-    padding: Spacing.four,
-  },
+  calendarContainer: { padding: Spacing.four },
   monthTitle: {
     textAlign: 'center',
     marginBottom: Spacing.four,
@@ -164,21 +177,21 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: ms(8),
     justifyContent: 'center',
   },
   dayCell: {
-    width: 45,
-    height: 45,
-    borderRadius: 10,
+    width: ms(45),
+    height: ms(45),
+    borderRadius: ms(10),
     backgroundColor: 'rgba(0,0,0,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   dot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    width: ms(4),
+    height: ms(4),
+    borderRadius: ms(2),
     backgroundColor: '#FFF',
     marginTop: 2,
   },
@@ -190,7 +203,47 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   legendText: {
-    fontSize: 12,
+    fontSize: Typography.caption,
     opacity: 0.6,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: vs(100),
+  },
+  emptySub: {
+    opacity: 0.6,
+    textAlign: 'center',
+    marginTop: 8,
+    maxWidth: 250,
+    fontSize: Typography.body,
+  },
+  // Unauth State
+  unauthContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.six,
+  },
+  unauthIconContainer: {
+    marginBottom: Spacing.four,
+    opacity: 0.8,
+  },
+  unauthTitle: {
+    fontSize: nf(32),
+    marginBottom: Spacing.two,
+    textAlign: 'center',
+  },
+  unauthSubtitle: {
+    fontSize: Typography.body,
+    opacity: 0.6,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: Spacing.six,
+  },
+  unauthButton: {
+    width: '100%',
+    height: vs(56),
   },
 });

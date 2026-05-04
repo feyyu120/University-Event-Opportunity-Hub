@@ -100,7 +100,7 @@ export default function WelcomeScreen() {
         <View style={styles.content}>
           <View style={styles.header}>
             <ThemedText type="label" style={styles.topLabel}>WELCOME TO</ThemedText>
-            <ThemedText type="h1" style={styles.brand}>CampusEvent</ThemedText>
+            <ThemedText style={styles.brand}>CampusEvent</ThemedText>
           </View>
 
           <Carousel items={VALUE_PROPS} />
@@ -123,7 +123,7 @@ export default function WelcomeScreen() {
             <View style={styles.buttonGroup}>
               <ThemedButton
                 title="Get Started"
-                onPress={() => router.push('/(auth)/verification')}
+                onPress={() => router.push('/(auth)/register')}
               />
               <View style={styles.rowActions}>
                 <TouchableOpacity style={styles.ghostBtn} onPress={() => router.push('/(auth)/login')}>
@@ -215,16 +215,16 @@ const styles = StyleSheet.create({
   topLabel: {
     letterSpacing: 3,
     marginBottom: 4,
-    marginTop: 50,
-    opacity: 0.5,
-    fontSize: 10,
+    marginTop: vs(40),
+    opacity: 0.6,
+    fontSize: nf(13),
   },
   brand: {
-    fontSize: nf(42),
+    fontSize: nf(52),
     color: '#6366F1',
     fontWeight: '900',
     letterSpacing: -1.5,
-    lineHeight: nf(50),
+    lineHeight: nf(58),
   },
 
   footer: {

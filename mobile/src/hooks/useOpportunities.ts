@@ -104,7 +104,14 @@ export function useOpportunities(filters: OpportunityFilters = {}): UseOpportuni
     } catch (err) {
       if (ENV.IS_DEV) {
         // Show mock data in dev when backend is not running
-        setData(FALLBACK_DATA);
+        let result = [...FALLBACK_DATA];
+        if (filters.is_saved) {
+          result = result.filter(item => item.save_count && item.save_count > 0); // Mock saved items
+        }
+        if (filters.is_applied) {
+          result = result.filter((_, idx) => idx % 2 === 0); // Mock applied items (every other item)
+        }
+        setData(result);
       } else {
         const message = err instanceof ApiError ? err.message : 'Failed to load opportunities.';
         setError(message);

@@ -4,19 +4,49 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ThemedText, ThemedView } from '@/components/Themed';
-import { Spacing, Colors, Radius, Shadows } from '@/constants/theme';
+import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
+import { Spacing, Colors, Radius, Shadows, Typography } from '@/constants/theme';
 import { haptic } from '@/utils/hapticHelper';
+import { nf, vs, ms } from '@/utils/responsive';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
   const insets = useSafeAreaInsets();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const [notifs, setNotifs] = useState({ match: true, deadline: true, status: true });
 
-  const HEADER_HEIGHT = 60;
+  const HEADER_HEIGHT = vs(60);
+
+  const handleLogout = async () => {
+    haptic.light();
+    await logout();
+    router.replace('/(auth)/welcome');
+  };
+
+  if (!isAuthenticated || !user) {
+    return (
+      <ThemedView style={styles.container}>
+        <View style={styles.unauthContainer}>
+          <View style={styles.unauthIconContainer}>
+            <Ionicons name="person-circle-outline" size={nf(100)} color={colors.primary} />
+          </View>
+          <ThemedText type="h1" style={styles.unauthTitle}>Profile</ThemedText>
+          <ThemedText style={styles.unauthSubtitle}>
+            Sign in to manage your profile, view saved opportunities, and track your applications.
+          </ThemedText>
+          <ThemedButton 
+            title="Sign In / Register" 
+            onPress={() => router.push('/(auth)/login')} 
+            style={styles.unauthButton}
+          />
+        </View>
+      </ThemedView>
+    );
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -40,16 +70,17 @@ export default function ProfileScreen() {
         {/* ── Avatar Section ── */}
         <View style={styles.avatarSection}>
           <View style={[styles.avatarContainer, Shadows.medium]}>
-            <Image 
-              source={{ uri: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=200' }} 
-              style={[styles.avatar, { borderColor: colors.backgroundElement }]} 
-            />
+            <View style={[styles.avatarFallback, { backgroundColor: colors.primary + '20', borderColor: colors.backgroundElement }]}>
+              <ThemedText style={[styles.avatarInitial, { color: colors.primary }]}>
+                {user.full_name?.charAt(0).toUpperCase() || 'U'}
+              </ThemedText>
+            </View>
             <TouchableOpacity style={[styles.editBadge, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]} onPress={() => haptic.light()}>
-              <Ionicons name="pencil" size={14} color={colors.primary} />
+              <Ionicons name="pencil" size={nf(14)} color={colors.primary} />
             </TouchableOpacity>
           </View>
-          <ThemedText type="title" style={styles.name}>Alex Johnson</ThemedText>
-          <ThemedText style={styles.bio}>Computer Science • Stanford University</ThemedText>
+          <ThemedText type="title" style={styles.name}>{user.full_name}</ThemedText>
+          <ThemedText style={styles.bio}>{user.department} • {user.university}</ThemedText>
         </View>
 
         <View style={styles.body}>
@@ -81,9 +112,9 @@ export default function ProfileScreen() {
           {/* ── Academic Profile ── */}
           <ThemedText type="label" style={styles.sectionLabel}>ACADEMIC PROFILE</ThemedText>
           <ThemedView variant="element" style={styles.card}>
-            <ProfileRow label="Department" value="Computer Science" icon="business-outline" />
-            <ProfileRow label="Year of Study" value="3rd Year" icon="school-outline" />
-            <ProfileRow label="GPA" value="3.8 / 4.0" icon="bar-chart-outline" isLast />
+            <ProfileRow label="Department" value={user.department} icon="business-outline" />
+            <ProfileRow label="Year of Study" value={user.year} icon="school-outline" />
+            <ProfileRow label="Email" value={user.email} icon="mail-outline" isLast />
           </ThemedView>
 
           {/* ── Notifications ── */}
@@ -115,7 +146,7 @@ export default function ProfileScreen() {
           <ThemedView variant="element" style={styles.card}>
             <ActionRow label="Privacy Settings" icon="lock-closed-outline" />
             <ActionRow label="Export My Data" icon="download-outline" />
-            <ActionRow label="Sign Out" icon="log-out-outline" isLast color={colors.accent} onPress={() => router.replace('/(auth)/welcome')} />
+            <ActionRow label="Sign Out" icon="log-out-outline" isLast color={colors.accent} onPress={handleLogout} />
           </ThemedView>
 
           <TouchableOpacity style={styles.deleteBtn}>
@@ -200,19 +231,25 @@ const styles = StyleSheet.create({
     position: 'relative',
     marginBottom: Spacing.three,
   },
-  avatar: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
+  avatarFallback: {
+    width: ms(110),
+    height: ms(110),
+    borderRadius: ms(55),
     borderWidth: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarInitial: {
+    fontSize: nf(40),
+    fontWeight: '800',
   },
   editBadge: {
     position: 'absolute',
     bottom: 0,
     right: 4,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: ms(32),
+    height: ms(32),
+    borderRadius: ms(16),
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
@@ -280,9 +317,37 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(150,150,150,0.2)',
   },
   rowLabelGroup: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  rowLabel: { fontSize: 15, fontWeight: '600' },
-  rowSubLabel: { fontSize: 13, opacity: 0.5, marginTop: 4, lineHeight: 18 },
-  rowValue: { fontSize: 14, opacity: 0.7 },
+  rowLabel: { fontSize: Typography.body, fontWeight: '600' },
+  rowSubLabel: { fontSize: Typography.small, opacity: 0.5, marginTop: 4, lineHeight: 18 },
+  rowValue: { fontSize: Typography.small, opacity: 0.7 },
   deleteBtn: { marginTop: Spacing.eight, alignItems: 'center', marginBottom: Spacing.five },
-  deleteText: { color: '#EF4444', fontSize: 14, fontWeight: '600', opacity: 0.8 },
+  deleteText: { color: '#EF4444', fontSize: Typography.small, fontWeight: '600', opacity: 0.8 },
+  
+  // Unauth State
+  unauthContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.six,
+  },
+  unauthIconContainer: {
+    marginBottom: Spacing.four,
+    opacity: 0.8,
+  },
+  unauthTitle: {
+    fontSize: nf(32),
+    marginBottom: Spacing.two,
+    textAlign: 'center',
+  },
+  unauthSubtitle: {
+    fontSize: Typography.body,
+    opacity: 0.6,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: Spacing.six,
+  },
+  unauthButton: {
+    width: '100%',
+    height: vs(56),
+  },
 });

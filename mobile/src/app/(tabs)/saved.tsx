@@ -1,45 +1,53 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, FlatList, TouchableOpacity, useColorScheme } from 'react-native';
+import { StyleSheet, View, FlatList, TouchableOpacity, useColorScheme, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ThemedText, ThemedView } from '@/components/Themed';
-import { OpportunityCard, Opportunity } from '@/components/OpportunityCard';
-import { Spacing, Colors, Radius } from '@/constants/theme';
+import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
+import { OpportunityCard } from '@/components/OpportunityCard';
+import { Spacing, Colors, Radius, Typography } from '@/constants/theme';
 import { haptic } from '@/utils/hapticHelper';
-
-const MOCK_SAVED: Opportunity[] = [
-  { 
-    id: '1', 
-    type: 'Internship', 
-    title: 'Software Engineer Intern', 
-    organization: 'Google', 
-    deadline: 'Oct 30', 
-    description: 'Working on core search algorithms.', 
-    match_score: 98, 
-    save_count: 1240, 
-    is_saved: true,
-    is_deadline_soon: false,
-    image: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=1000'
-  },
-  { id: '2', type: 'Scholarship', title: 'Academic Excellence Grant', organization: 'University Foundation', deadline: 'Tomorrow', description: 'Merit-based scholarship for CS students.', save_count: 450, is_saved: true, is_deadline_soon: true, match_score: 80 },
-];
+import { nf, vs, ms } from '@/utils/responsive';
+import { useAuth } from '@/context/AuthContext';
+import { useOpportunities } from '@/hooks/useOpportunities';
 
 export default function SavedScreen() {
-  const [items, setItems] = useState<Opportunity[]>(MOCK_SAVED);
+  const router = useRouter();
+  const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colors = Colors[theme];
+  const insets = useSafeAreaInsets();
+  const { user, isAuthenticated } = useAuth();
+  const { data: items, loading, toggleSave } = useOpportunities({ is_saved: true });
+
   const [sortBy, setSortBy] = useState<'Deadline' | 'Newest'>('Deadline');
   
-  const theme  = useColorScheme() === 'dark' ? 'dark' : 'light';
-  const colors = Colors[theme];
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
+  const HEADER_HEIGHT = vs(100);
 
-  const HEADER_HEIGHT = 100;
+  if (!isAuthenticated || !user) {
+    return (
+      <ThemedView style={styles.container}>
+        <View style={styles.unauthContainer}>
+          <View style={styles.unauthIconContainer}>
+            <Ionicons name="bookmark" size={nf(80)} color={colors.primary} />
+          </View>
+          <ThemedText type="h1" style={styles.unauthTitle}>Saved</ThemedText>
+          <ThemedText style={styles.unauthSubtitle}>
+            Sign in to bookmark opportunities and access them later from any device.
+          </ThemedText>
+          <ThemedButton 
+            title="Sign In / Register" 
+            onPress={() => router.push('/(auth)/login')} 
+            style={styles.unauthButton}
+          />
+        </View>
+      </ThemedView>
+    );
+  }
 
   const handleDelete = (id: string) => {
     haptic.selection();
-    setItems(prev => prev.filter(item => item.id !== id));
+    toggleSave(id);
   };
 
   return (
@@ -69,7 +77,11 @@ export default function SavedScreen() {
       </BlurView>
 
       {/* ── Content ── */}
-      {items.length > 0 ? (
+      {loading ? (
+        <View style={styles.emptyState}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      ) : items.length > 0 ? (
         <FlatList
           data={items}
           renderItem={({ item }) => (
@@ -139,55 +151,85 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.four,
   },
   exportBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: ms(16),
+    paddingVertical: vs(8),
     borderRadius: Radius.medium,
   },
   exportText: {
-    fontSize: 13,
+    fontSize: Typography.small,
     fontWeight: '700',
   },
   filterBar: {
     flexDirection: 'row',
     paddingHorizontal: Spacing.four,
-    gap: 8,
+    gap: ms(8),
     paddingBottom: Spacing.three,
   },
   filterTab: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: ms(16),
+    paddingVertical: vs(8),
     borderRadius: Radius.full,
     backgroundColor: 'rgba(0,0,0,0.03)',
   },
   filterTabText: {
-    fontSize: 13,
+    fontSize: Typography.small,
     fontWeight: '500',
     opacity: 0.6,
   },
   listContent: {
     padding: Spacing.four,
-    paddingBottom: 100,
+    paddingBottom: vs(100),
   },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: 100,
+    paddingBottom: vs(100),
   },
   emptySub: {
     opacity: 0.6,
     textAlign: 'center',
     marginTop: 8,
     maxWidth: 250,
+    fontSize: Typography.body,
   },
   browseBtn: {
-    marginTop: 24,
-    paddingHorizontal: 24,
-    paddingVertical: 14,
+    marginTop: vs(24),
+    paddingHorizontal: ms(24),
+    paddingVertical: vs(14),
     borderRadius: Radius.medium,
   },
   browseText: {
     color: '#FFF',
     fontWeight: '700',
+    fontSize: Typography.body,
+  },
+  
+  // Unauth State
+  unauthContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.six,
+  },
+  unauthIconContainer: {
+    marginBottom: Spacing.four,
+    opacity: 0.8,
+  },
+  unauthTitle: {
+    fontSize: nf(32),
+    marginBottom: Spacing.two,
+    textAlign: 'center',
+  },
+  unauthSubtitle: {
+    fontSize: Typography.body,
+    opacity: 0.6,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: Spacing.six,
+  },
+  unauthButton: {
+    width: '100%',
+    height: vs(56),
   },
 });
