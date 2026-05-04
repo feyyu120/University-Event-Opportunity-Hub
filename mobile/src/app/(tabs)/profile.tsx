@@ -19,7 +19,7 @@ export default function ProfileScreen() {
 
   const [notifs, setNotifs] = useState({ match: true, deadline: true, status: true });
 
-  const HEADER_HEIGHT = vs(60);
+  const HEADER_HEIGHT = vs(100);
 
   const handleLogout = async () => {
     haptic.light();
@@ -55,12 +55,15 @@ export default function ProfileScreen() {
       <BlurView
         intensity={theme === 'dark' ? 60 : 80}
         tint={theme === 'dark' ? 'dark' : 'light'}
-        style={[styles.headerOverlay, { paddingTop: insets.top, height: insets.top + HEADER_HEIGHT }]}
+        style={[styles.headerOverlay, { paddingTop: insets.top }]}
       >
-        <View style={[styles.headerBar]}>
-          <ThemedText type="defaultSemiBold" style={{ fontSize: 18 }}>Profile</ThemedText>
+        <View style={[styles.headerBar, { height: HEADER_HEIGHT }]}>
+          <View>
+            <ThemedText type="title">Profile</ThemedText>
+            <ThemedText type="small">Manage your account</ThemedText>
+          </View>
           <TouchableOpacity onPress={() => haptic.light()} accessibilityRole="button">
-            <Ionicons name="settings-outline" size={24} color={colors.text} />
+            <Ionicons name="settings-outline" size={nf(24)} color={colors.text} />
           </TouchableOpacity>
         </View>
       </BlurView>
@@ -219,8 +222,9 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     paddingHorizontal: Spacing.four,
+    paddingBottom: Spacing.four,
   },
   scrollContent: { paddingBottom: 110 },
   avatarSection: {

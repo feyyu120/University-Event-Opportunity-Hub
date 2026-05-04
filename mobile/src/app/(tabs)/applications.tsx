@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, FlatList, TouchableOpacity, SafeAreaView, useColorScheme, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, FlatList, TouchableOpacity, useColorScheme, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
 import { Spacing, Colors, Radius, Typography } from '@/constants/theme';
 import { nf, vs, ms } from '@/utils/responsive';
@@ -12,9 +14,12 @@ export default function ApplicationsScreen() {
   const router = useRouter();
   const theme  = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
+  const insets = useSafeAreaInsets();
   const { user, isAuthenticated } = useAuth();
   const { data: items, loading } = useOpportunities({ is_applied: true });
   const [view, setView] = useState<'List' | 'Calendar'>('List');
+  
+  const HEADER_HEIGHT = vs(100);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -32,7 +37,7 @@ export default function ApplicationsScreen() {
           <View style={styles.unauthIconContainer}>
             <Ionicons name="document-text" size={nf(80)} color={colors.primary} />
           </View>
-          <ThemedText type="h1" style={styles.unauthTitle}>Applications</ThemedText>
+          <ThemedText type="h1" style={styles.unauthTitle}>Applied</ThemedText>
           <ThemedText style={styles.unauthSubtitle}>
             Sign in to track your applications and view your upcoming interviews and deadlines.
           </ThemedText>
@@ -48,23 +53,32 @@ export default function ApplicationsScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <View style={styles.header}>
+      {/* ── Glassmorphic Header ── */}
+      <BlurView
+        intensity={theme === 'dark' ? 60 : 80}
+        tint={theme === 'dark' ? 'dark' : 'light'}
+        style={[styles.headerOverlay, { paddingTop: insets.top }]}
+      >
+        <View style={[styles.header, { height: HEADER_HEIGHT }]}>
           <View>
-            <ThemedText type="title">My Applications</ThemedText>
-            <View style={[styles.toggleContainer, { backgroundColor: colors.backgroundElement }]}>
-              {(['List', 'Calendar'] as const).map(v => (
-                <TouchableOpacity
-                  key={v}
-                  style={[styles.toggleBtn, view === v && { backgroundColor: colors.background }]}
-                  onPress={() => setView(v)}
-                >
-                  <ThemedText style={view === v ? { fontWeight: '700' } : undefined}>{v}</ThemedText>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <ThemedText type="title">Applied</ThemedText>
+            <ThemedText type="small">{items.length} applications submitted</ThemedText>
           </View>
         </View>
+        <View style={styles.filterBar}>
+          <View style={[styles.toggleContainer, { backgroundColor: colors.backgroundElement }]}>
+            {(['List', 'Calendar'] as const).map(v => (
+              <TouchableOpacity
+                key={v}
+                style={[styles.toggleBtn, view === v && { backgroundColor: colors.background }]}
+                onPress={() => setView(v)}
+              >
+                <ThemedText style={view === v ? { fontWeight: '700' } : undefined}>{v}</ThemedText>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </BlurView>
 
         {view === 'List' ? (
           loading ? (
@@ -119,24 +133,36 @@ export default function ApplicationsScreen() {
             </View>
           </View>
         )}
-      </SafeAreaView>
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  headerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
   header: {
-    padding: Spacing.four,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    paddingHorizontal: Spacing.four,
     paddingBottom: Spacing.four,
-    minHeight: vs(120),
-    justifyContent: 'flex-end',
+  },
+  filterBar: {
+    paddingHorizontal: Spacing.four,
+    paddingBottom: Spacing.three,
   },
   toggleContainer: {
     flexDirection: 'row',
     borderRadius: ms(12),
     padding: ms(4),
-    marginTop: Spacing.two,
   },
   toggleBtn: {
     flex: 1,
@@ -144,7 +170,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: ms(8),
   },
-  list: { padding: Spacing.four, paddingBottom: vs(120) },
+  list: { padding: Spacing.four, paddingTop: vs(170), paddingBottom: vs(120) },
   appCard: {
     flexDirection: 'row',
     padding: Spacing.four,
@@ -169,7 +195,7 @@ const styles = StyleSheet.create({
     paddingVertical: ms(6),
     borderRadius: ms(8),
   },
-  calendarContainer: { padding: Spacing.four },
+  calendarContainer: { padding: Spacing.four, paddingTop: vs(170) },
   monthTitle: {
     textAlign: 'center',
     marginBottom: Spacing.four,

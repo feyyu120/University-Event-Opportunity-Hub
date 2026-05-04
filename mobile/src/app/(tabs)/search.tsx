@@ -1,45 +1,29 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, FlatList, TouchableOpacity, ActivityIndicator, SafeAreaView, useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText, ThemedView } from '@/components/Themed';
-import { OpportunityCard, Opportunity } from '@/components/OpportunityCard';
-import { Spacing, Colors, Radius, Shadows } from '@/constants/theme';
-
-const MOCK_RESULTS: Opportunity[] = [
-  { id: '1', type: 'Internship', title: 'Software Engineer Intern', organization: 'Google', deadline: 'Oct 30', description: 'Working on core search algorithms.', matchScore: 98, saveCount: 1240, image: 'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=1000' },
-  { id: '5', type: 'Workshop', title: 'UI/UX Design Systems', organization: 'Design Club', deadline: 'Oct 28', description: 'Learn Figma and design principles.', matchScore: 85, saveCount: 156 },
-];
+import { OpportunityCard } from '@/components/OpportunityCard';
+import { Spacing, Colors, Radius, Typography } from '@/constants/theme';
+import { nf, vs, ms } from '@/utils/responsive';
+import { useOpportunities } from '@/hooks/useOpportunities';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export default function SearchScreen() {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<Opportunity[]>([]);
+  const debouncedQuery = useDebounce(query, 300);
+  
   const [recentSearches, setRecentSearches] = useState<string[]>(['Figma', 'Google Internship', 'React Native']);
-  const [loading, setLoading] = useState(false);
   const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
   const router = useRouter();
-  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const { data: results, loading, toggleSave } = useOpportunities({ 
+    search: debouncedQuery.length > 2 ? debouncedQuery : undefined 
+  });
 
   const handleSearch = (text: string) => {
     setQuery(text);
-    if (searchTimeout.current) clearTimeout(searchTimeout.current);
-
-    if (text.length > 2) {
-      setLoading(true);
-      searchTimeout.current = setTimeout(() => {
-        // Mock search logic
-        const filtered = MOCK_RESULTS.filter(item => 
-          item.title.toLowerCase().includes(text.toLowerCase()) || 
-          item.organization.toLowerCase().includes(text.toLowerCase())
-        );
-        setResults(filtered);
-        setLoading(false);
-      }, 300);
-    } else {
-      setResults([]);
-      setLoading(false);
-    }
   };
 
   return (
@@ -48,18 +32,19 @@ export default function SearchScreen() {
         <View style={styles.header}>
           <ThemedText type="title" style={styles.title}>Search</ThemedText>
           <View style={[styles.searchBox, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}>
-            <Ionicons name="search-outline" size={20} color={colors.textSecondary} style={{ marginRight: 8 }} />
+            <Ionicons name="search-outline" size={nf(20)} color={colors.textSecondary} style={{ marginRight: 8 }} />
             <TextInput
               style={[styles.input, { color: colors.text }]}
-              placeholder="Search opportunities..."
+              placeholder="Search by title, role, or type..."
               placeholderTextColor={colors.textSecondary}
               value={query}
               onChangeText={handleSearch}
               autoFocus
+              allowFontScaling={false}
             />
             {query.length > 0 && (
               <TouchableOpacity onPress={() => handleSearch('')}>
-                <Ionicons name="close-circle" size={20} color={colors.textSecondary} />
+                <Ionicons name="close-circle" size={nf(20)} color={colors.textSecondary} />
               </TouchableOpacity>
             )}
           </View>
@@ -96,9 +81,9 @@ export default function SearchScreen() {
                 renderItem={({ item }) => (
                   <TouchableOpacity activeOpacity={0.9} onPress={() => router.push(`/opportunity/${item.id}`)}>
                     <OpportunityCard 
-                      item={item} 
-                      onBookmark={() => {}} 
-                      onApply={() => {}} 
+                      item={{ ...item, saved: item.is_saved, saveCount: item.save_count }} 
+                      onBookmark={toggleSave} 
+                      onApply={() => router.push(`/opportunity/${item.id}`)} 
                       onShowReason={() => {}} 
                     />
                   </TouchableOpacity>

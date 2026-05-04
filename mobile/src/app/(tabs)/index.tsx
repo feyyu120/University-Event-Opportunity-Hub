@@ -137,10 +137,8 @@ export default function HomeFeedScreen() {
       >
         <View style={[styles.header, { height: HEADER_HEIGHT }]}>
           <View>
-            <ThemedText type="label" style={styles.greeting}>{getTodayLabel()}</ThemedText>
-            <ThemedText type="h1">
-              {activeFilterCount > 0 ? 'Filtered' : firstName}
-            </ThemedText>
+            <ThemedText type="title">Explore</ThemedText>
+            <ThemedText type="small" style={styles.greeting}>{getTodayLabel()}</ThemedText>
           </View>
 
           <View style={styles.headerIcons}>
@@ -149,7 +147,7 @@ export default function HomeFeedScreen() {
               onPress={() => { haptic.light(); router.push('/search'); }}
               accessibilityRole="button"
             >
-              <Ionicons name="search" size={nf(24)} color={colors.text} />
+              <Ionicons name="search" size={nf(28)} color={colors.text} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -157,22 +155,8 @@ export default function HomeFeedScreen() {
               onPress={() => { haptic.light(); router.push('/notifications'); }}
               accessibilityRole="button"
             >
-              <Ionicons name="notifications-outline" size={nf(24)} color={colors.text} />
+              <Ionicons name="notifications-outline" size={nf(28)} color={colors.text} />
               <View style={[styles.notifDot, { backgroundColor: colors.accent }]} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.filterBtn, { backgroundColor: colors.text }]}
-              onPress={() => { haptic.medium(); setFilterVisible(true); }}
-              accessibilityRole="button"
-            >
-              <Ionicons name="options-outline" size={nf(16)} color={colors.background} />
-              <ThemedText style={[styles.filterText, { color: colors.background }]}>Filter</ThemedText>
-              {activeFilterCount > 0 && (
-                <View style={[styles.badge, { backgroundColor: colors.accent, borderColor: colors.text }]}>
-                  <ThemedText style={styles.badgeText}>{activeFilterCount}</ThemedText>
-                </View>
-              )}
             </TouchableOpacity>
           </View>
         </View>
