@@ -18,8 +18,8 @@ try {
     $stmt = $pdo->prepare("
         SELECT 
             o.*,
-            (SELECT COUNT(*) FROM opportunity_likes WHERE opportunity_id = o.id) as real_like_count,
-            (SELECT COUNT(*) FROM opportunity_comments WHERE opportunity_id = o.id) as real_comment_count,
+            (SELECT COUNT(*) FROM opportunity_likes WHERE opportunity_id = o.id) as like_count,
+            (SELECT COUNT(*) FROM opportunity_comments WHERE opportunity_id = o.id) as comment_count,
             EXISTS(SELECT 1 FROM opportunity_likes WHERE opportunity_id = o.id AND user_id = ?) as is_liked,
             EXISTS(SELECT 1 FROM saved_opportunities WHERE opportunity_id = o.id AND user_id = ?) as is_saved,
             EXISTS(SELECT 1 FROM applications WHERE opportunity_id = o.id AND user_id = ?) as is_applied
