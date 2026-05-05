@@ -30,8 +30,8 @@ export function InteractionSection({ opportunityId, comments: initialComments, o
     
     setSubmitting(true);
 
-    // Mock items (or guests): create local-only comment without API call
-    const isMockItem = isOfflineMode || opportunityId.startsWith('t') || !opportunityId.includes('-') || !user;
+    // Mock items (or guests): create local-only comment without assuming all non-UUID IDs are fake
+    const isMockItem = isOfflineMode || opportunityId.startsWith('t') || !user;
     if (isMockItem) {
       haptic.success();
       const localComment: Comment = {

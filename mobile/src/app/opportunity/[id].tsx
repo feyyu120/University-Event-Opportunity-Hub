@@ -34,14 +34,14 @@ export default function OpportunityDetailScreen() {
 
   // Check if current item is a mock/fallback (not in the database)
   const isMockItem = useCallback((itemId: string) => {
-    return itemId.startsWith('t') || !itemId.includes('-') || data?.title?.includes('Backend Offline');
+    return itemId.startsWith('t') || data?.title?.includes('Backend Offline');
   }, [data?.title]);
 
   const fetchData = useCallback(async () => {
     if (!id) return;
     setLoading(true);
     try {
-      // If we already have the data from params and it's offline mode, we don't need to fetch
+      // If we already have the data from params and it's specifically a demo/mock item, skip the backend fetch
       if (itemData && isMockItem(id)) {
         setLoading(false);
         return;
@@ -290,7 +290,7 @@ export default function OpportunityDetailScreen() {
             opportunityId={data.id} 
             comments={comments} 
             onCommentAdded={(newC) => setComments(prev => [...prev, newC])}
-            isOfflineMode={isMockItem(data.id) ? true : false}
+            isOfflineMode={isMockItem(data.id)}
           />
         </View>
         <View style={{ height: 140 }} />
