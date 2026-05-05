@@ -103,24 +103,12 @@ export default function WelcomeScreen() {
             <ThemedText style={styles.brand}>CampusEvent</ThemedText>
           </View>
 
-          <View style={{ flex: 1, justifyContent: 'center' }}>
+          <View style={{ flex: 0.75, justifyContent: 'center' }}>
             <Carousel items={VALUE_PROPS} />
           </View>
 
           <View style={styles.footer}>
-            <View style={styles.dropdownContainer}>
-              <ThemedText type="label" style={styles.label}>YOUR UNIVERSITY</ThemedText>
-              <TouchableOpacity
-                style={[styles.dropdown, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
-                onPress={() => setIsModalVisible(true)}
-              >
-                <View style={styles.dropdownContent}>
-                  <Ionicons name="school-outline" size={20} color={colors.primary} style={styles.dropdownIcon} />
-                  <ThemedText style={styles.uniText} numberOfLines={1}>{selectedUniversity}</ThemedText>
-                </View>
-                <Ionicons name="chevron-down" size={18} color={colors.textSecondary} />
-              </TouchableOpacity>
-            </View>
+
 
             <View style={styles.buttonGroup}>
               <ThemedButton
@@ -140,58 +128,6 @@ export default function WelcomeScreen() {
           </View>
         </View>
 
-        <Modal visible={isModalVisible} animationType="slide" transparent>
-          <View style={styles.modalOverlay}>
-            <ThemedView variant="element" style={[styles.modalContent, Shadows.premium]}>
-              <View style={styles.modalHeader}>
-                <View>
-                  <ThemedText type="subtitle">Select University</ThemedText>
-                  <ThemedText type="caption">Choose your current institution</ThemedText>
-                </View>
-                <TouchableOpacity onPress={() => setIsModalVisible(false)} style={styles.closeCircle}>
-                  <Ionicons name="close" size={20} color={colors.text} />
-                </TouchableOpacity>
-              </View>
-
-              <View style={[styles.searchBar, { backgroundColor: colors.background, borderColor: colors.border }]}>
-                <Ionicons name="search-outline" size={18} color={colors.textSecondary} />
-                <TextInput
-                  style={[styles.searchInput, { color: colors.text }]}
-                  placeholder="Search universities..."
-                  placeholderTextColor={colors.textSecondary}
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                />
-              </View>
-
-              <FlatList
-                data={filteredUniversities}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[
-                      styles.uniItem,
-                      item === selectedUniversity && { backgroundColor: colors.primary + '10', borderRadius: 12 }
-                    ]}
-                    onPress={() => {
-                      setSelectedUniversity(item);
-                      setIsModalVisible(false);
-                      setSearchQuery('');
-                    }}
-                  >
-                    <ThemedText style={[
-                      styles.uniItemText,
-                      item === selectedUniversity && { color: colors.primary, fontWeight: '700' }
-                    ]}>{item}</ThemedText>
-                    {item === selectedUniversity && <Ionicons name="checkmark-circle" size={22} color={colors.primary} />}
-                  </TouchableOpacity>
-                )}
-                keyExtractor={(item) => item}
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.listContent}
-              />
-            </ThemedView>
-          </View>
-        </Modal>
       </SafeAreaView>
     </ThemedView>
   );
@@ -230,8 +166,8 @@ const styles = StyleSheet.create({
   },
 
   footer: {
-    marginTop: Spacing.two,
-    marginBottom: Spacing.eight,
+    marginTop: vs(18),
+    marginBottom: vs(35),
   },
   dropdownContainer: {
     marginBottom: Spacing.four,
@@ -264,7 +200,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   buttonGroup: {
-    gap: Spacing.three,
+    gap: Spacing.two,
   },
   rowActions: {
     flexDirection: 'row',

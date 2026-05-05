@@ -52,11 +52,11 @@ export default function SavedScreen() {
   };
 
   const renderItem = useCallback(({ item }: { item: any }) => (
-    <TouchableOpacity activeOpacity={0.9} onPress={() => router.push(`/opportunity/${item.id}`)}>
+    <TouchableOpacity activeOpacity={0.9} onPress={() => router.push({ pathname: '/opportunity/[id]', params: { id: item.id, itemData: JSON.stringify(item) } })}>
       <OpportunityCard 
         item={{ ...item, saved: item.is_saved, saveCount: item.save_count }} 
         onBookmark={handleDelete} 
-        onApply={() => router.push(`/opportunity/${item.id}`)} 
+        onApply={() => router.push({ pathname: '/opportunity/[id]', params: { id: item.id, itemData: JSON.stringify(item) } })} 
         onShowReason={() => {}} 
       />
     </TouchableOpacity>

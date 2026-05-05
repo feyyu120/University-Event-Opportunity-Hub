@@ -13,9 +13,10 @@ interface InteractionSectionProps {
   opportunityId: string;
   comments: Comment[];
   onCommentAdded: (newComment: Comment) => void;
+  isOfflineMode?: boolean;
 }
 
-export function InteractionSection({ opportunityId, comments: initialComments, onCommentAdded }: InteractionSectionProps) {
+export function InteractionSection({ opportunityId, comments: initialComments, onCommentAdded, isOfflineMode }: InteractionSectionProps) {
   const { user } = useAuth();
   const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
@@ -25,20 +26,20 @@ export function InteractionSection({ opportunityId, comments: initialComments, o
   const [replyTo, setReplyTo] = useState<Comment | null>(null);
 
   const handleSubmit = async () => {
-    if (!newComment.trim() || !user) return;
+    if (!newComment.trim()) return;
     
     setSubmitting(true);
 
-    // Mock items: create local-only comment without API call
-    const isMockItem = opportunityId.startsWith('t') || !opportunityId.includes('-');
+    // Mock items (or guests): create local-only comment without API call
+    const isMockItem = isOfflineMode || opportunityId.startsWith('t') || !opportunityId.includes('-') || !user;
     if (isMockItem) {
       haptic.success();
       const localComment: Comment = {
         id: `local-${Date.now()}`,
         opportunity_id: opportunityId,
-        user_id: user.id.toString(),
-        user_name: user.full_name,
-        profile_image: user.profile_image,
+        user_id: user?.id?.toString() || 'guest',
+        user_name: user?.full_name || 'Guest Explorer',
+        profile_image: user?.profile_image || 'https://ui-avatars.com/api/?name=Guest',
         parent_id: replyTo?.id || null,
         content: newComment.trim(),
         created_at: new Date().toISOString(),
@@ -71,7 +72,7 @@ export function InteractionSection({ opportunityId, comments: initialComments, o
         setReplyTo(null);
       }
     } catch (err) {
-      console.error('Failed to post comment:', err);
+      console.log('Failed to post comment (handled gracefully):', err);
       haptic.error();
     } finally {
       setSubmitting(false);

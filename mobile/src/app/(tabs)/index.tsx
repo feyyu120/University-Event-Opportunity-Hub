@@ -95,9 +95,13 @@ export default function HomeFeedScreen() {
 
   const firstName = user?.full_name?.split(' ')[0] ?? 'Explorer';
 
-  const handlePressCard = useCallback((id: string) => {
+  const handlePressCard = useCallback((id: string, itemData?: Opportunity) => {
     haptic.light();
-    router.push(`/opportunity/${id}`);
+    if (itemData) {
+      router.push({ pathname: '/opportunity/[id]', params: { id, itemData: JSON.stringify(itemData) } });
+    } else {
+      router.push(`/opportunity/${id}`);
+    }
   }, [router]);
 
   const renderItem = useCallback(({ item, index }: { item: Opportunity; index: number }) => {
@@ -109,7 +113,7 @@ export default function HomeFeedScreen() {
           <TrendingSection
             title="🔥 Top Trending"
             items={TRENDING_DATA}
-            onPress={(it: Opportunity) => handlePressCard(it.id)}
+            onPress={(it: Opportunity) => handlePressCard(it.id, it)}
           />
         )}
         {index === 1 && deadlineSoonItems.length > 0 && (
@@ -118,7 +122,7 @@ export default function HomeFeedScreen() {
         <OpportunityCard
           item={{ ...item, saved: item.is_saved, saveCount: item.save_count }}
           onBookmark={toggleSave}
-          onApply={() => handlePressCard(item.id)}
+          onApply={() => handlePressCard(item.id, item)}
           onShowReason={(i) => { setSelectedItem(item); setSheetVisible(true); }}
         />
       </AnimatedCard>

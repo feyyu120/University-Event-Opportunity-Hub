@@ -17,13 +17,13 @@ import { useAuth } from '@/context/AuthContext';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function OpportunityDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, itemData } = useLocalSearchParams<{ id: string; itemData?: string }>();
   const { user } = useAuth();
   const router = useRouter();
   const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
   
-  const [data, setData] = useState<Opportunity | null>(null);
+  const [data, setData] = useState<Opportunity | null>(itemData ? JSON.parse(itemData) : null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
@@ -34,13 +34,19 @@ export default function OpportunityDetailScreen() {
 
   // Check if current item is a mock/fallback (not in the database)
   const isMockItem = useCallback((itemId: string) => {
-    return itemId.startsWith('t') || !itemId.includes('-');
-  }, []);
+    return itemId.startsWith('t') || !itemId.includes('-') || data?.title?.includes('Backend Offline');
+  }, [data?.title]);
 
   const fetchData = useCallback(async () => {
     if (!id) return;
     setLoading(true);
     try {
+      // If we already have the data from params and it's offline mode, we don't need to fetch
+      if (itemData && isMockItem(id)) {
+        setLoading(false);
+        return;
+      }
+      
       const res = await opportunitiesApi.detail(id, user?.id?.toString());
       if (res.success) {
         // Map organization_name to organization if needed
@@ -54,23 +60,33 @@ export default function OpportunityDetailScreen() {
         setLikeCount(res.data.like_count || 0);
         setApplied(res.data.is_applied || false);
       }
+      if ((res as any).error) throw new Error((res as any).error);
     } catch (err) {
-      console.error('Failed to fetch detail:', err);
+      console.log('Backend Offline fallback triggered (using local mock data).');
       // Temporarily show mock fallback for ALL failed API calls (including real items)
-      // This allows the app to work seamlessly even while the Render backend is missing the endpoint
-      setData({
-        id,
-        type: 'Internship',
-        title: id.startsWith('t') ? 'Featured Trending Opportunity' : 'Sample Opportunity (Backend Offline)',
-        organization: 'UniHub Partner',
-        deadline: 'Oct 30, 2026',
-        description: 'This is sample data because the real details could not be loaded from the server.\n\n### Requirements:\n- Current student at an Ethiopian University\n- Passion for innovation\n- Willingness to learn',
-        image: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=1000',
-      } as Opportunity);
+      // If itemData was provided from the list, we can just use that instead of generic text!
+      if (itemData) {
+        const parsed = JSON.parse(itemData);
+        setData({
+          ...parsed,
+          title: parsed.title + ' (Backend Offline)',
+          description: parsed.description || 'No full description available (Server offline).'
+        });
+      } else {
+        setData({
+          id,
+          type: 'Internship',
+          title: id.startsWith('t') ? 'Featured Trending Opportunity' : 'Sample Opportunity (Backend Offline)',
+          organization: 'UniHub Partner',
+          deadline: 'Oct 30, 2026',
+          description: 'This is sample data because the real details could not be loaded from the server.\n\n### Requirements:\n- Current student at an Ethiopian University\n- Passion for innovation\n- Willingness to learn',
+          image: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=1000',
+        } as Opportunity);
+      }
     } finally {
       setLoading(false);
     }
-  }, [id, user?.id]);
+  }, [id, user?.id, itemData]);
 
   useEffect(() => {
     fetchData();
@@ -87,15 +103,15 @@ export default function OpportunityDetailScreen() {
     haptic.selection();
     try {
       await Share.share({ message: `Check out this: ${data.title} at ${data.organization || data.organization_name}` });
-    } catch (error) { console.error(error); }
+    } catch (error) { console.log('Share error:', error); }
   };
 
   const handleLike = async () => {
-    if (!data || !user) return;
+    if (!data) return;
     haptic.success();
 
-    // Mock items: local-only toggle
-    if (isMockItem(data.id)) {
+    // Mock items (or guests): local-only toggle
+    if (isMockItem(data.id) || !user) {
       setIsLiked(prev => !prev);
       setLikeCount(prev => !isLiked ? prev + 1 : Math.max(0, prev - 1));
       return;
@@ -273,7 +289,8 @@ export default function OpportunityDetailScreen() {
           <InteractionSection 
             opportunityId={data.id} 
             comments={comments} 
-            onCommentAdded={(newC) => setComments(prev => [...prev, newC])} 
+            onCommentAdded={(newC) => setComments(prev => [...prev, newC])}
+            isOfflineMode={isMockItem(data.id) ? true : false}
           />
         </View>
         <View style={{ height: 140 }} />

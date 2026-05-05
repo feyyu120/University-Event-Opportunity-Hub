@@ -93,9 +93,22 @@ export function useOpportunities(filters: OpportunityFilters = {}): UseOpportuni
     try {
       // Use specialized endpoints for saved/applied if possible, or pass to list
       const res = await opportunitiesApi.list({ ...filters, user_id: user?.id?.toString() });
-      setData(res.results || []);
+      
+      // Some old backend endpoints might return 200 OK but contain an error message
+      if ((res as any).error) {
+        throw new ApiError((res as any).error, 400);
+      }
+      
+      // If valid data is returned, use it
+      if (res.results && res.results.length > 0) {
+        setData(res.results);
+      } else {
+        throw new Error('No results from backend');
+      }
     } catch (err) {
-      if (ENV.IS_DEV) {
+      // Always fallback to mock data for guests (!user) or if we're in Dev mode
+      // This ensures the Explore page is never empty while the backend is fixing its routes
+      if (ENV.IS_DEV || !user) {
         let result = [...FALLBACK_DATA];
         if (filters.is_saved) {
           result = result.filter(item => item.save_count && item.save_count > 0);
