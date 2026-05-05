@@ -101,7 +101,6 @@ export default function SavedScreen() {
             keyExtractor={item => item.id}
             contentContainerStyle={[styles.listContent, { paddingTop: insets.top + HEADER_HEIGHT + 60 }]}
             showsVerticalScrollIndicator={false}
-            estimatedItemSize={220}
           />
         </View>
       ) : (

@@ -1,46 +1,82 @@
-import React, { useState, useRef } from 'react';
-import { StyleSheet, View, Animated, TouchableOpacity, Share, Dimensions, Platform } from 'react-native';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { StyleSheet, View, Animated, TouchableOpacity, Share, Dimensions, ActivityIndicator, Alert, useColorScheme } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
-import { QASection } from '@/components/QASection';
+import { InteractionSection } from '@/components/InteractionSection';
 import { CampusMap } from '@/components/CampusMap';
 import { getBuildingLocation } from '@/utils/locationHelper';
 import { Spacing, Colors, Radius, Shadows } from '@/constants/theme';
 import { haptic } from '@/utils/hapticHelper';
-import { useColorScheme } from 'react-native';
+import { opportunitiesApi, type Opportunity, type Comment } from '@/api/opportunities';
+import { useAuth } from '@/context/AuthContext';
+
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const getOpportunityData = (id: string) => ({
-  id,
-  type: 'Internship' as const,
-  title: 'Software Engineer Intern (Cloud Systems)',
-  organization: 'Google',
-  deadline: 'Oct 30, 2026',
-  isDeadlineSoon: true,
-  description: 'Join the Google Cloud team to build next-generation infrastructure. You will work on distributed systems, optimize storage performance, and collaborate with engineers globally.\n\n### Key Responsibilities:\n- Design and implement cloud primitives\n- Optimize resource allocation algorithms\n- Build scalable monitoring tools using Go and Python\n\n### Required Skills:\n- Strong foundation in data structures and algorithms\n- Experience with C++, Go, or Rust\n- Familiarity with Kubernetes is a plus',
-  eligibility: 'Open to 3rd year and above, CGPA ≥ 3.5',
-  location: 'Google Building 43, Mountain View, CA',
-  mode: 'Hybrid',
-  contact: 'internships@google.com',
-  departments: ['Computer Science', 'Data Science', 'Mathematics'],
-  image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200',
-});
-
 export default function OpportunityDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { user } = useAuth();
   const router = useRouter();
-  const data = getOpportunityData(id || '1');
   const theme = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
   
-  const [isSaved, setIsSaved] = useState(false);
+  const [data, setData] = useState<Opportunity | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [applied, setApplied] = useState(false);
   
   const scrollY = useRef(new Animated.Value(0)).current;
+
+  // Check if current item is a mock/fallback (not in the database)
+  const isMockItem = useCallback((itemId: string) => {
+    return itemId.startsWith('t') || !itemId.includes('-');
+  }, []);
+
+  const fetchData = useCallback(async () => {
+    if (!id) return;
+    setLoading(true);
+    try {
+      const res = await opportunitiesApi.detail(id, user?.id?.toString());
+      if (res.success) {
+        // Map organization_name to organization if needed
+        const mappedData = {
+          ...res.data,
+          organization: res.data.organization || res.data.organization_name || 'UniHub Partner'
+        };
+        setData(mappedData);
+        setComments(res.comments || []);
+        setIsLiked(res.data.is_liked || false);
+        setLikeCount(res.data.like_count || 0);
+        setApplied(res.data.is_applied || false);
+      }
+    } catch (err) {
+      console.error('Failed to fetch detail:', err);
+      // Only show mock fallback for actual mock/hardcoded IDs — not real database items
+      if (isMockItem(id)) {
+        setData({
+          id,
+          type: 'Internship',
+          title: id.startsWith('t') ? 'Featured Trending Opportunity' : 'Sample Opportunity',
+          organization: 'UniHub Partner',
+          deadline: 'Oct 30, 2026',
+          description: 'This is a sample opportunity for preview purposes.\n\n### Requirements:\n- Current student at an Ethiopian University\n- Passion for innovation\n- Willingness to learn',
+          image: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=1000',
+        } as Opportunity);
+      }
+      // Real items that fail to load will show the error state (data stays null)
+    } finally {
+      setLoading(false);
+    }
+  }, [id, user?.id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const headerOpacity = scrollY.interpolate({
     inputRange: [150, 250],
@@ -49,20 +85,97 @@ export default function OpportunityDetailScreen() {
   });
 
   const handleShare = async () => {
+    if (!data) return;
     haptic.selection();
     try {
-      await Share.share({ message: `Check out this: ${data.title} at ${data.organization}` });
+      await Share.share({ message: `Check out this: ${data.title} at ${data.organization || data.organization_name}` });
     } catch (error) { console.error(error); }
   };
 
-  const handleSave = () => {
+  const handleLike = async () => {
+    if (!data || !user) return;
     haptic.success();
-    setIsSaved(!isSaved);
+
+    // Mock items: local-only toggle
+    if (isMockItem(data.id)) {
+      setIsLiked(prev => !prev);
+      setLikeCount(prev => !isLiked ? prev + 1 : Math.max(0, prev - 1));
+      return;
+    }
+    
+    // Optimistic UI update
+    const newLiked = !isLiked;
+    setIsLiked(newLiked);
+    setLikeCount(prev => newLiked ? prev + 1 : prev - 1);
+
+    try {
+      const res = await opportunitiesApi.like(data.id, user.id.toString());
+      // Sync with server response if needed
+      setIsLiked(res.liked);
+      setLikeCount(res.like_count);
+    } catch (err) {
+      // Revert on error
+      setIsLiked(!newLiked);
+      setLikeCount(prev => !newLiked ? prev + 1 : prev - 1);
+    }
   };
+
+  const handleReport = () => {
+    if (!data || !user) return;
+    haptic.warning();
+
+    // Mock items can't be reported
+    if (isMockItem(data.id)) {
+      Alert.alert("Demo Mode", "Reporting is not available for sample opportunities.");
+      return;
+    }
+    
+    Alert.prompt(
+      "Report Opportunity",
+      "Why are you reporting this? (Scam, inappropriate, expired, etc.)",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Submit", 
+          onPress: async (reason: string | undefined) => {
+            if (!reason || reason.length < 5) {
+              Alert.alert("Error", "Please provide a valid reason.");
+              return;
+            }
+            try {
+              const res = await opportunitiesApi.report(data.id, user.id.toString(), reason);
+              if (res.success) {
+                Alert.alert("Success", res.message);
+              }
+            } catch (err: any) {
+              Alert.alert("Error", err.message || "Failed to submit report.");
+            }
+          } 
+        }
+      ]
+    );
+  };
+
+  if (loading) {
+    return (
+      <ThemedView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </ThemedView>
+    );
+  }
+
+  if (!data) {
+    return (
+      <ThemedView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ThemedText>Failed to load opportunity details.</ThemedText>
+        <ThemedButton title="Go Back" onPress={() => router.back()} style={{ marginTop: 20 }} />
+      </ThemedView>
+    );
+  }
 
   return (
     <ThemedView style={styles.container}>
-      {/* Enterprise Blur Header */}
+      {/* Header */}
       <Animated.View style={[styles.navBar, { opacity: headerOpacity }]}>
         <ThemedView variant="blur" style={StyleSheet.absoluteFill} />
         <SafeAreaView edges={['top']}>
@@ -84,14 +197,18 @@ export default function OpportunityDetailScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.heroContainer}>
-          <Image source={{ uri: data.image }} style={styles.heroImage} contentFit="cover" />
+          <Image 
+            source={data.image ? { uri: data.image } : { uri: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=1000' }} 
+            style={styles.heroImage} 
+            contentFit="cover" 
+          />
           <View style={styles.imageOverlay} />
         </View>
 
         <View style={[styles.body, { backgroundColor: colors.background }]}>
           <View style={styles.titleSection}>
             <View style={styles.orgRow}>
-              <ThemedText type="label">{data.organization}</ThemedText>
+              <ThemedText type="label">{data.organization || data.organization_name}</ThemedText>
               <View style={[styles.verifiedBadge, { backgroundColor: colors.success + '15' }]}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                   <Ionicons name="checkmark-circle" size={12} color={colors.success} />
@@ -105,7 +222,7 @@ export default function OpportunityDetailScreen() {
               <View style={[styles.typeBadge, { backgroundColor: colors.primary + '15' }]}>
                 <ThemedText style={[styles.typeText, { color: colors.primary }]}>{data.type}</ThemedText>
               </View>
-              {data.isDeadlineSoon && (
+              {data.is_deadline_soon && (
                 <View style={[styles.deadlineBadge, { backgroundColor: colors.accent + '15' }]}>
                   <ThemedText style={[styles.deadlineText, { color: colors.accent }]}>Ends Soon</ThemedText>
                 </View>
@@ -115,14 +232,14 @@ export default function OpportunityDetailScreen() {
 
           <View style={[styles.actionRow, Shadows.medium, { backgroundColor: colors.backgroundElement }]}>
             <ActionItem 
-              icon={isSaved ? "heart" : "heart-outline"} 
-              iconColor={isSaved ? "#EF4444" : colors.text}
-              label={isSaved ? "Saved" : "Save"} 
-              onPress={handleSave} 
+              icon={isLiked ? "heart" : "heart-outline"} 
+              iconColor={isLiked ? "#EF4444" : colors.text}
+              label={likeCount > 0 ? `${likeCount}` : "Like"} 
+              onPress={handleLike} 
             />
-            <ActionItem icon="calendar-outline" label="Add" onPress={() => haptic.light()} />
+            <ActionItem icon="chatbubble-outline" label="Comment" onPress={() => haptic.light()} />
             <ActionItem icon="share-social-outline" label="Share" onPress={handleShare} />
-            <ActionItem icon="flag-outline" label="Report" onPress={() => haptic.warning()} />
+            <ActionItem icon="flag-outline" label="Report" onPress={handleReport} />
           </View>
 
           <View style={styles.section}>
@@ -130,22 +247,24 @@ export default function OpportunityDetailScreen() {
             <ThemedText style={styles.description}>{data.description}</ThemedText>
           </View>
 
-          <View style={styles.section}>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>Eligibility</ThemedText>
-            <ThemedView variant="element" style={styles.eligibilityCard}>
-              <ThemedText type="defaultSemiBold" style={{ color: colors.primary }}>{data.eligibility}</ThemedText>
-            </ThemedView>
-          </View>
+          {data.eligibility && (
+            <View style={styles.section}>
+              <ThemedText type="subtitle" style={styles.sectionTitle}>Eligibility</ThemedText>
+              <ThemedView variant="element" style={styles.eligibilityCard}>
+                <ThemedText type="defaultSemiBold" style={{ color: colors.primary }}>{data.eligibility}</ThemedText>
+              </ThemedView>
+            </View>
+          )}
 
           <View style={styles.section}>
             <ThemedText type="subtitle" style={styles.sectionTitle}>Details</ThemedText>
             <View style={styles.infoGrid}>
-              <InfoItem icon="location-outline" label="Location" value={data.location} />
-              <InfoItem icon="business-outline" label="Work Mode" value={data.mode} />
-              <InfoItem icon="mail-outline" label="Inquiries" value={data.contact} />
+              {data.location && <InfoItem icon="location-outline" label="Location" value={data.location} />}
+              {data.mode && <InfoItem icon="business-outline" label="Work Mode" value={data.mode} />}
+              {data.contact && <InfoItem icon="mail-outline" label="Inquiries" value={data.contact} />}
             </View>
 
-            {getBuildingLocation(data.location) && (
+            {data.location && getBuildingLocation(data.location) && (
               <CampusMap 
                 locations={[getBuildingLocation(data.location)!]} 
                 fullLocationName={data.location} 
@@ -153,7 +272,11 @@ export default function OpportunityDetailScreen() {
             )}
           </View>
 
-          <QASection />
+          <InteractionSection 
+            opportunityId={data.id} 
+            comments={comments} 
+            onCommentAdded={(newC) => setComments(prev => [...prev, newC])} 
+          />
         </View>
         <View style={{ height: 140 }} />
       </Animated.ScrollView>
@@ -163,7 +286,21 @@ export default function OpportunityDetailScreen() {
           <View style={styles.footerContent}>
             <ThemedButton 
               title={applied ? "Application Tracked" : "Apply Now"} 
-              onPress={() => { haptic.success(); setApplied(true); }} 
+              onPress={async () => { 
+                if (!user || applied) return;
+                haptic.success();
+                // Mock items: local-only toggle
+                if (isMockItem(data.id)) {
+                  setApplied(true);
+                  return;
+                }
+                try {
+                  await opportunitiesApi.apply(data.id, user.id.toString());
+                  setApplied(true);
+                } catch (err) {
+                  Alert.alert("Error", "Failed to track application.");
+                }
+              }} 
               variant={applied ? "secondary" : "primary"}
               style={{ flex: 1 }}
             />

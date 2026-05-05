@@ -94,7 +94,7 @@ export default function SearchScreen() {
                   renderItem={renderItem}
                   keyExtractor={item => item.id}
                   contentContainerStyle={styles.listContent}
-                  estimatedItemSize={220}
+
                 />
               </View>
             ) : (

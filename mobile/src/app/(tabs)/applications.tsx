@@ -108,7 +108,7 @@ export default function ApplicationsScreen() {
                 renderItem={renderItem}
                 keyExtractor={item => item.id}
                 contentContainerStyle={styles.list}
-                estimatedItemSize={120}
+
               />
             </View>
           ) : (

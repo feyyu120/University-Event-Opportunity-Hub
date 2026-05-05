@@ -10,13 +10,25 @@ import { apiClient } from './client';
 
 export type OpportunityType = 'Event' | 'Scholarship' | 'Internship' | 'Workshop' | 'Hackathon';
 
+export interface Comment {
+  id: string;
+  opportunity_id: string;
+  user_id: string;
+  user_name: string;
+  profile_image?: string;
+  parent_id?: string | null;
+  content: string;
+  created_at: string;
+}
+
 export interface Opportunity {
   id: string;
   type: OpportunityType;
   title: string;
   organization: string;
+  organization_name?: string;     // From backend join
   deadline: string;
-  deadline_date?: string;        // ISO 8601 for date calculations
+  deadline_date?: string;
   is_deadline_soon?: boolean;
   description: string;
   eligibility?: string;
@@ -27,17 +39,18 @@ export interface Opportunity {
   image?: string;
   match_score?: number;
   save_count?: number;
+  like_count?: number;           // New
+  comment_count?: number;        // New
   is_saved?: boolean;
+  is_liked?: boolean;            // New
   is_applied?: boolean;
   reason?: string;
   created_at?: string;
 }
 
 export interface OpportunityListResponse {
-  data: Opportunity[];
-  total: number;
   page: number;
-  per_page: number;
+  results: Opportunity[];
 }
 
 export interface OpportunityFilters {
@@ -50,6 +63,7 @@ export interface OpportunityFilters {
   per_page?: number;
   is_saved?: boolean;
   is_applied?: boolean;
+  user_id?: string;
 }
 
 export interface ApplicationStatus {
@@ -59,56 +73,69 @@ export interface ApplicationStatus {
   notes?: string;
 }
 
+export interface OpportunityDetailResponse {
+  success: boolean;
+  data: Opportunity;
+  comments: Comment[];
+}
+
 // ─── Endpoints ────────────────────────────────────────────────────────────────
 
 export const opportunitiesApi = {
   /** Fetch paginated feed with optional filters */
   list: (filters: OpportunityFilters = {}) => {
-    const params = new URLSearchParams();
-    if (filters.search)             params.set('search', filters.search);
-    if (filters.type?.length)       params.set('type', filters.type.join(','));
-    if (filters.department)         params.set('department', filters.department);
-    if (filters.mode)               params.set('mode', filters.mode);
-    if (filters.deadline_within_days) params.set('deadline_within_days', String(filters.deadline_within_days));
-    if (filters.page)               params.set('page', String(filters.page));
-    if (filters.per_page)           params.set('per_page', String(filters.per_page));
-
-    const query = params.toString();
-    return apiClient.get<OpportunityListResponse>(
-      `opportunities/list.php${query ? `?${query}` : ''}`
-    );
+    return apiClient.post<OpportunityListResponse>('opportunities/feed', {
+      user_id: filters.user_id,
+      page: filters.page || 1,
+      limit: filters.per_page || 10,
+      search: filters.search,
+      type: filters.type,
+      is_saved: filters.is_saved,
+      is_applied: filters.is_applied
+    });
   },
 
   /** Fetch single opportunity detail */
-  detail: (id: string) =>
-    apiClient.get<Opportunity>(`opportunities/detail.php?id=${id}`),
+  detail: (id: string, userId?: string) =>
+    apiClient.get<OpportunityDetailResponse>(`opportunities/detail?id=${id}${userId ? `&user_id=${userId}` : ''}`),
 
-  /** Toggle save/bookmark */
-  save: (opportunityId: string) =>
-    apiClient.post<{ saved: boolean; save_count: number }>(
-      'opportunities/save.php',
-      { opportunity_id: opportunityId }
+  /** Toggle bookmark */
+  save: (opportunityId: string, userId: string) =>
+    apiClient.post<any>('users/saved', { user_id: userId, opportunity_id: opportunityId }),
+
+  /** Toggle like */
+  like: (opportunityId: string, userId: string) =>
+    apiClient.post<{ liked: boolean; like_count: number }>(
+      'opportunities/like',
+      { opportunity_id: opportunityId, user_id: userId }
+    ),
+
+  /** Post comment or reply */
+  comment: (opportunityId: string, userId: string, content: string, parentId?: string) =>
+    apiClient.post<{ success: boolean; data: Comment }>(
+      'opportunities/comment',
+      { opportunity_id: opportunityId, user_id: userId, content, parent_id: parentId }
+    ),
+
+  /** Report opportunity */
+  report: (opportunityId: string, userId: string, reason: string) =>
+    apiClient.post<{ success: boolean; message: string }>(
+      'opportunities/report',
+      { opportunity_id: opportunityId, user_id: userId, reason }
     ),
 
   /** Mark as applied + update tracker */
-  apply: (opportunityId: string, notes?: string) =>
-    apiClient.post<{ status: ApplicationStatus }>(
-      'opportunities/apply.php',
-      { opportunity_id: opportunityId, notes }
+  apply: (opportunityId: string, userId: string, notes?: string) =>
+    apiClient.post<any>(
+      'users/applications',
+      { user_id: userId, opportunity_id: opportunityId, notes }
     ),
 
   /** Get user's saved list */
-  saved: () =>
-    apiClient.get<OpportunityListResponse>('opportunities/saved.php'),
+  saved: (userId: string) =>
+    apiClient.get<any>(`users/saved?user_id=${userId}`),
 
   /** Get user's applications */
-  applications: () =>
-    apiClient.get<ApplicationStatus[]>('opportunities/applications.php'),
-
-  /** Update application status */
-  updateApplicationStatus: (opportunityId: string, status: ApplicationStatus['status']) =>
-    apiClient.put<{ status: ApplicationStatus }>(
-      'opportunities/applications.php',
-      { opportunity_id: opportunityId, status }
-    ),
+  applications: (userId: string) =>
+    apiClient.get<any>(`users/applications?user_id=${userId}`),
 };

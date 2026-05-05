@@ -40,7 +40,7 @@ const TYPE_CONFIG: Record<OpportunityType, { icon: keyof typeof Ionicons.glyphMa
 export const OpportunityCard = memo(function OpportunityCard({ item, onBookmark, onApply, onShowReason }: OpportunityCardProps) {
   const theme  = useColorScheme() === 'dark' ? 'dark' : 'light';
   const colors = Colors[theme];
-  const config = TYPE_CONFIG[item.type];
+  const config = TYPE_CONFIG[item.type] || { icon: 'rocket', color: '#6366F1' };
 
   return (
     <ThemedView style={[styles.card, Shadows.soft, { backgroundColor: colors.backgroundElement }]}>
@@ -76,7 +76,7 @@ export const OpportunityCard = memo(function OpportunityCard({ item, onBookmark,
       </View>
 
       <View style={styles.content}>
-        <ThemedText type="label" style={styles.org}>{item.organization}</ThemedText>
+        <ThemedText type="label" style={styles.org}>{item.organization || (item as any).organization_name || 'UniHub Partner'}</ThemedText>
         <ThemedText type="subtitle" numberOfLines={2} style={styles.title}>{item.title}</ThemedText>
 
         <View style={styles.infoRow}>

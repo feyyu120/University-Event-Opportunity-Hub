@@ -174,7 +174,6 @@ export default function HomeFeedScreen() {
           data={data}
           renderItem={renderItem}
           keyExtractor={item => item.id}
-          estimatedItemSize={320}
           contentContainerStyle={[styles.listContent, { paddingTop: insets.top + HEADER_HEIGHT + Spacing.two }]}
           showsVerticalScrollIndicator={false}
           refreshControl={

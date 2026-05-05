@@ -1,17 +1,8 @@
-/**
- * useOpportunities — Data fetching hook for the home feed.
- *
- * Features:
- * - Fetch with loading / error / empty states
- * - Optimistic bookmark toggle
- * - Pull-to-refresh
- * - Falls back to mock data when API is unreachable (dev mode)
- */
-
 import { useState, useEffect, useCallback } from 'react';
 import { opportunitiesApi, type Opportunity, type OpportunityFilters } from '@/api/opportunities';
 import { ApiError } from '@/api/client';
 import { ENV } from '@/config/env';
+import { useAuth } from '@/context/AuthContext';
 
 // ── Dev-mode fallback data (used when backend is offline) ──
 const FALLBACK_DATA: Opportunity[] = [
@@ -88,6 +79,7 @@ interface UseOpportunitiesResult {
 }
 
 export function useOpportunities(filters: OpportunityFilters = {}): UseOpportunitiesResult {
+  const { user } = useAuth();
   const [data, setData]           = useState<Opportunity[]>([]);
   const [loading, setLoading]     = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -99,35 +91,37 @@ export function useOpportunities(filters: OpportunityFilters = {}): UseOpportuni
     setError(null);
 
     try {
-      const res = await opportunitiesApi.list(filters);
-      setData(res.data);
+      // Use specialized endpoints for saved/applied if possible, or pass to list
+      const res = await opportunitiesApi.list({ ...filters, user_id: user?.id?.toString() });
+      setData(res.results || []);
     } catch (err) {
       if (ENV.IS_DEV) {
-        // Show mock data in dev when backend is not running
         let result = [...FALLBACK_DATA];
         if (filters.is_saved) {
-          result = result.filter(item => item.save_count && item.save_count > 0); // Mock saved items
+          result = result.filter(item => item.save_count && item.save_count > 0);
         }
         if (filters.is_applied) {
-          result = result.filter((_, idx) => idx % 2 === 0); // Mock applied items (every other item)
+          result = result.filter((_, idx) => idx % 2 === 0);
         }
         setData(result);
       } else {
         const message = err instanceof ApiError ? err.message : 'Failed to load opportunities.';
         setError(message);
+        setData([]); // Ensure data is at least empty array
       }
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [JSON.stringify(filters)]);
+  }, [JSON.stringify(filters), user?.id]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const refresh = useCallback(() => fetchData(true), [fetchData]);
 
-  // Optimistic toggle — updates UI immediately, no extra API call needed
   const toggleSave = useCallback((id: string) => {
+    if (!user) return;
+    
     setData(prev =>
       prev.map(item =>
         item.id === id
@@ -135,9 +129,8 @@ export function useOpportunities(filters: OpportunityFilters = {}): UseOpportuni
           : item
       )
     );
-    // Fire-and-forget background API call
-    opportunitiesApi.save(id).catch(() => {
-      // Revert on failure
+
+    opportunitiesApi.save(id, user.id.toString()).catch(() => {
       setData(prev =>
         prev.map(item =>
           item.id === id
@@ -146,7 +139,7 @@ export function useOpportunities(filters: OpportunityFilters = {}): UseOpportuni
         )
       );
     });
-  }, []);
+  }, [user]);
 
-  return { data, loading, refreshing, error, refresh, toggleSave };
+  return { data: data || [], loading, refreshing, error, refresh, toggleSave };
 }

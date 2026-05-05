@@ -5,6 +5,9 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_pgsql
  
 RUN a2enmod rewrite
+
+# Ensure AllowOverride is enabled so .htaccess rewrite rules work
+RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
  
 COPY . /var/www/html/
 
