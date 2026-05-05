@@ -103,7 +103,9 @@ export default function WelcomeScreen() {
             <ThemedText style={styles.brand}>CampusEvent</ThemedText>
           </View>
 
-          <Carousel items={VALUE_PROPS} />
+          <View style={{ flex: 1, justifyContent: 'center' }}>
+            <Carousel items={VALUE_PROPS} />
+          </View>
 
           <View style={styles.footer}>
             <View style={styles.dropdownContainer}>

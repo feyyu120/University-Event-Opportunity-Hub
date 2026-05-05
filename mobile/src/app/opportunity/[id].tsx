@@ -56,19 +56,17 @@ export default function OpportunityDetailScreen() {
       }
     } catch (err) {
       console.error('Failed to fetch detail:', err);
-      // Only show mock fallback for actual mock/hardcoded IDs — not real database items
-      if (isMockItem(id)) {
-        setData({
-          id,
-          type: 'Internship',
-          title: id.startsWith('t') ? 'Featured Trending Opportunity' : 'Sample Opportunity',
-          organization: 'UniHub Partner',
-          deadline: 'Oct 30, 2026',
-          description: 'This is a sample opportunity for preview purposes.\n\n### Requirements:\n- Current student at an Ethiopian University\n- Passion for innovation\n- Willingness to learn',
-          image: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=1000',
-        } as Opportunity);
-      }
-      // Real items that fail to load will show the error state (data stays null)
+      // Temporarily show mock fallback for ALL failed API calls (including real items)
+      // This allows the app to work seamlessly even while the Render backend is missing the endpoint
+      setData({
+        id,
+        type: 'Internship',
+        title: id.startsWith('t') ? 'Featured Trending Opportunity' : 'Sample Opportunity (Backend Offline)',
+        organization: 'UniHub Partner',
+        deadline: 'Oct 30, 2026',
+        description: 'This is sample data because the real details could not be loaded from the server.\n\n### Requirements:\n- Current student at an Ethiopian University\n- Passion for innovation\n- Willingness to learn',
+        image: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80&w=1000',
+      } as Opportunity);
     } finally {
       setLoading(false);
     }

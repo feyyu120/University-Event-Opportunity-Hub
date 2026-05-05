@@ -43,10 +43,10 @@ export function Carousel({ items }: CarouselProps) {
     <View style={styles.cardContainer}>
       <ThemedView variant="element" style={styles.card}>
         <View style={[styles.iconContainer, { backgroundColor: (item.iconColor || colors.primary) + '15' }]}>
-          <Ionicons name={item.icon} size={nf(32)} color={item.iconColor || colors.primary} />
+          <Ionicons name={item.icon} size={nf(44)} color={item.iconColor || colors.primary} />
         </View>
-        <ThemedText type="subtitle" style={styles.title}>{item.title}</ThemedText>
-        <ThemedText style={styles.description} numberOfLines={2}>{item.description}</ThemedText>
+        <ThemedText type="title" style={styles.title}>{item.title}</ThemedText>
+        <ThemedText style={styles.description} numberOfLines={3}>{item.description}</ThemedText>
       </ThemedView>
     </View>
   );
@@ -90,34 +90,35 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
   },
   card: {
-    padding: Spacing.three,
-    borderRadius: ms(20),
-    minHeight: vs(140),
+    padding: Spacing.six,
+    borderRadius: ms(32),
+    minHeight: vs(320),
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 8,
   },
   iconContainer: {
-    width: ms(52),
-    height: ms(52),
-    borderRadius: ms(14),
+    width: ms(80),
+    height: ms(80),
+    borderRadius: ms(24),
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Spacing.two,
+    marginBottom: Spacing.four,
   },
   title: {
     textAlign: 'center',
-    marginBottom: Spacing.one,
+    marginBottom: Spacing.two,
+    fontSize: Typography.h3,
   },
   description: {
     textAlign: 'center',
-    opacity: 0.6,
-    fontSize: Typography.small,
-    lineHeight: Typography.small * 1.4,
+    opacity: 0.7,
+    fontSize: Typography.body,
+    lineHeight: Typography.body * 1.5,
     paddingHorizontal: Spacing.two,
   },
   pagination: {
