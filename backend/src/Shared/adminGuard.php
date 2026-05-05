@@ -1,5 +1,4 @@
-<?php 
-
+<?php
 require_once __DIR__ . '/db.php';
 
 class Guard {  
@@ -30,12 +29,11 @@ class Guard {
     } 
     public static function checkAccess($requiredRole = 'admin') { 
         self::checkIP();   
- 
-        $authId = $_SERVER['HTTP_X_USER_ID'] ?? $_SERVER['HTTP_USER_ID'] ?? null;
-    
+        $authId = $_SERVER['HTTP_X_AUTH_TOKEN'] ?? $_SERVER['HTTP_USER_ID'] ?? null;
+
         if (!$authId) {
-            self::denyAccess("Authentication required. Header missing.");
-        }   
+            self::denyAccess("Authentication required. Please log in again.");
+        }
 
         $pdo = get_db_connection(); 
         $stmt = $pdo->prepare("SELECT id, role FROM users WHERE id = ?");
@@ -69,7 +67,7 @@ class Guard {
     }
 
     private static function denyAccess($msg) {
-        http_response_code(200);
+        http_response_code(403);
         die(json_encode(["success" => false, "message" => $msg]));
     }
 }

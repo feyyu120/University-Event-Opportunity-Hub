@@ -10,10 +10,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit();
 }
  
-$requestUri = $_SERVER['REQUEST_URI'];
-$basePath = 'University-Event-Opportunity-Hub/backend'; 
- 
-$route = str_replace($basePath, '', parse_url($requestUri, PHP_URL_PATH));
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$scriptName = dirname($_SERVER['SCRIPT_NAME']);
+$route = str_replace($scriptName, '', $requestUri);
 $route = trim($route, '/');
  
 file_put_contents('requests.log', "[" . date('Y-m-d H:i:s') . "] " . $route . "\n", FILE_APPEND);
@@ -52,8 +51,21 @@ switch ($route) {
     case 'opportunities/feed': 
         require __DIR__ . '/opportunities/feed.php';
         break;
+    case 'opportunities/detail': 
+        require __DIR__ . '/opportunities/detail.php';
+        break;
+    case 'opportunities/like': 
+        require __DIR__ . '/opportunities/like.php';
+        break;
+    case 'opportunities/comment': 
+        require __DIR__ . '/opportunities/comment.php';
+        break;
     case 'opportunities/report': 
         require __DIR__ . '/opportunities/report.php';
+        break;
+
+    case 'init/social':
+        require __DIR__ . '/init_social.php';
         break;
 
     // case '':
