@@ -12,9 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
  
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $scriptName = dirname($_SERVER['SCRIPT_NAME']);
-$route = str_replace($scriptName, '', $requestUri);
-$route = trim($route, '/');
- 
+
+$route = trim(preg_replace('#^' . preg_quote($scriptName, '#') . '#', '', $requestUri), '/');
+if ($route === '') {
+    $route = trim($requestUri, '/');
+}
+
 file_put_contents('requests.log', "[" . date('Y-m-d H:i:s') . "] " . $route . "\n", FILE_APPEND);
  
 switch ($route) {
