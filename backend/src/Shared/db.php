@@ -1,13 +1,11 @@
-<?php  
-
-header("Access-Control-Allow-Origin: https://astu-event-center-backend.onrender.com");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE, PUT");
-header("Access-Control-Allow-Headers: Content-Type, Admin-Accesible-API-Key, User-ID");
-header("Access-Control-Allow-Credentials: true");
+<?php   
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE, PUT"); 
+header("Access-Control-Allow-Headers: Content-Type, X-User-ID, Authorization");
  
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     http_response_code(200);
-    exit;
+    exit();
 }
 
 function get_db_connection() { 

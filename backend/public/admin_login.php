@@ -85,7 +85,7 @@
             const data = await res.json();
            
             if (data.success) { 
-                const adminId = data.admin_id || data.id; 
+                const adminId =  data.id; 
                 localStorage.setItem('storedUserId', adminId); 
 
                 msg.innerText = "Access Granted. Redirecting...";

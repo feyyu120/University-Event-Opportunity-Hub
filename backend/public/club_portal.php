@@ -616,7 +616,7 @@
 <script>
 const API_BASE = window.location.hostname === "localhost" 
     ? "http://localhost/University-Event-Opportunity-Hub/backend/" 
-    : "https://astu-event-center-backend.onrender.com";
+    : "https://astu-event-center-backend.onrender.com/";
 
 let CLUB_ID = localStorage.getItem('club_id'); 
 let organization_name = 'Club'; 
