@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { ThemedText, ThemedView, ThemedButton } from '@/components/Themed';
 import { SettingsModal } from '@/components/SettingsModal';
+import { SupportModal } from '@/components/SupportModal';
 import { Spacing, Colors, Radius, Shadows, Typography } from '@/constants/theme';
 import { haptic } from '@/utils/hapticHelper';
 import { nf, vs, ms } from '@/utils/responsive';
@@ -21,6 +22,7 @@ export default function ProfileScreen() {
 
   const [notifs, setNotifs] = useState({ match: true, deadline: true, status: true });
   const [settingsVisible, setSettingsVisible] = useState(false);
+  const [supportVisible, setSupportVisible] = useState(false);
 
   const HEADER_HEIGHT = vs(100);
 
@@ -150,10 +152,35 @@ export default function ProfileScreen() {
               isLast
             />
           </ThemedView>
+
+          {/* ── Support & About ── */}
+          <ThemedText type="label" style={styles.sectionLabel}>SUPPORT & ABOUT</ThemedText>
+          <ThemedView variant="element" style={styles.card}>
+            <ActionRow 
+              label="Help & Support" 
+              icon="help-circle-outline" 
+              onPress={() => { haptic.light(); setSupportVisible(true); }}
+            />
+            <ActionRow 
+              label="About UniHub" 
+              icon="information-circle-outline" 
+              isLast 
+              onPress={() => { haptic.light(); setSupportVisible(true); }}
+            />
+          </ThemedView>
+
+          {/* ── Logout ── */}
+          <View style={styles.logoutContainer}>
+            <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+              <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+              <ThemedText style={styles.logoutText}>Sign Out</ThemedText>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
 
       <SettingsModal visible={settingsVisible} onClose={() => setSettingsVisible(false)} />
+      <SupportModal visible={supportVisible} onClose={() => setSupportVisible(false)} />
     </ThemedView>
   );
 }
@@ -330,6 +357,27 @@ const styles = StyleSheet.create({
   rowValue: { fontSize: Typography.small, opacity: 0.7 },
   deleteBtn: { marginTop: Spacing.eight, alignItems: 'center', marginBottom: Spacing.five },
   deleteText: { color: '#EF4444', fontSize: Typography.small, fontWeight: '600', opacity: 0.8 },
+  
+  logoutContainer: {
+    marginTop: Spacing.eight,
+    marginBottom: Spacing.six,
+  },
+  logoutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: Spacing.four,
+    borderRadius: Radius.medium,
+    backgroundColor: '#EF444415',
+    borderWidth: 1,
+    borderColor: '#EF444430',
+    gap: 8,
+  },
+  logoutText: {
+    color: '#EF4444',
+    fontSize: nf(16),
+    fontWeight: '600',
+  },
   
   // Unauth State
   unauthContainer: {

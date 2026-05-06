@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { StyleSheet, View, Animated, TouchableOpacity, Share, Dimensions, ActivityIndicator, Alert, useColorScheme } from 'react-native';
+import { StyleSheet, View, Animated, TouchableOpacity, Share, Dimensions, ActivityIndicator, Alert, useColorScheme, Modal, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ScrollView, TextInput } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,8 +29,19 @@ export default function OpportunityDetailScreen() {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [applied, setApplied] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [studentName, setStudentName] = useState(user?.full_name ?? '');
+  const [studentUniversityId, setStudentUniversityId] = useState('');
+  const [submittingApplication, setSubmittingApplication] = useState(false);
+  const [applicationError, setApplicationError] = useState<string | null>(null);
   
   const scrollY = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (user?.full_name) {
+      setStudentName(prev => prev || user.full_name);
+    }
+  }, [user?.full_name]);
 
   // Check if current item is a mock/fallback (not in the database)
   const isMockItem = useCallback((itemId: string) => {
@@ -170,6 +181,38 @@ export default function OpportunityDetailScreen() {
     );
   };
 
+  const handleSubmitApplication = async () => {
+    if (!data || !user) return;
+    if (!studentName.trim() || !studentUniversityId.trim()) {
+      setApplicationError('Please enter your name and your university ID.');
+      return;
+    }
+
+    setSubmittingApplication(true);
+    setApplicationError(null);
+
+    const notes = `Student Name: ${studentName.trim()}\nUniversity ID: ${studentUniversityId.trim()}\nEmail: ${user.email}`;
+
+    try {
+      if (isMockItem(data.id)) {
+        setApplied(true);
+        setShowApplyModal(false);
+        Alert.alert('Application saved', 'This application was recorded locally for demo content.');
+      } else {
+        await opportunitiesApi.apply(data.id, user.id.toString(), notes);
+        setApplied(true);
+        setShowApplyModal(false);
+        Alert.alert('Application submitted', 'Your application has been sent successfully.');
+      }
+    } catch (err: any) {
+      console.log('Application submission failed:', err);
+      setApplicationError(err?.message || 'Failed to submit application.');
+      Alert.alert('Error', err?.message || 'Failed to submit application.');
+    } finally {
+      setSubmittingApplication(false);
+    }
+  };
+
   if (loading) {
     return (
       <ThemedView style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -301,20 +344,14 @@ export default function OpportunityDetailScreen() {
           <View style={styles.footerContent}>
             <ThemedButton 
               title={applied ? "Application Tracked" : "Apply Now"} 
-              onPress={async () => { 
-                if (!user || applied) return;
-                haptic.success();
-                // Mock items: local-only toggle
-                if (isMockItem(data.id)) {
-                  setApplied(true);
+              onPress={() => {
+                if (!user) {
+                  Alert.alert('Login required', 'Please login to apply for this opportunity.');
                   return;
                 }
-                try {
-                  await opportunitiesApi.apply(data.id, user.id.toString());
-                  setApplied(true);
-                } catch (err) {
-                  Alert.alert("Error", "Failed to track application.");
-                }
+                if (applied) return;
+                haptic.success();
+                setShowApplyModal(true);
               }} 
               variant={applied ? "secondary" : "primary"}
               style={{ flex: 1 }}
@@ -323,8 +360,70 @@ export default function OpportunityDetailScreen() {
         </SafeAreaView>
       </View>
 
+      <Modal visible={showApplyModal} transparent animationType="slide" onRequestClose={() => setShowApplyModal(false)}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalOverlay}>
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.modalContainer}>
+              <View style={[styles.modalContent, { backgroundColor: colors.background }]}> 
+                <ThemedText type="title" style={styles.formTitle}>Apply for this Opportunity</ThemedText>
+                <ThemedText type="default" style={{ marginBottom: Spacing.three, opacity: 0.8 }}>
+                  Your email is provided automatically from your account.
+                </ThemedText>
+                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.modalScroll}>
+                  <View style={styles.formField}>
+                    <ThemedText type="label" style={styles.formLabel}>Email</ThemedText>
+                    <View style={[styles.readOnlyField, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}> 
+                      <ThemedText type="defaultSemiBold">{user?.email || 'No email available'}</ThemedText>
+                    </View>
+                  </View>
+
+                  <View style={styles.formField}>
+                    <ThemedText type="label" style={styles.formLabel}>Full Name</ThemedText>
+                    <TextInput
+                      value={studentName}
+                      onChangeText={setStudentName}
+                      placeholder="Enter your full name"
+                      placeholderTextColor={colors.textSecondary}
+                      style={[styles.textInput, { color: colors.text, backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
+                    />
+                  </View>
+
+                  <View style={styles.formField}>
+                    <ThemedText type="label" style={styles.formLabel}>University ID</ThemedText>
+                    <TextInput
+                      value={studentUniversityId}
+                      onChangeText={setStudentUniversityId}
+                      placeholder="Enter your university ID"
+                      placeholderTextColor={colors.textSecondary}
+                      style={[styles.textInput, { color: colors.text, backgroundColor: colors.backgroundElement, borderColor: colors.border }]}
+                    />
+                  </View>
+
+                  {applicationError ? (
+                    <ThemedText type="caption" style={styles.errorText}>{applicationError}</ThemedText>
+                  ) : null}
+                </ScrollView>
+
+                <View style={styles.modalButtons}>
+                  <ThemedButton
+                    title="Submit Application"
+                    onPress={handleSubmitApplication}
+                    disabled={submittingApplication}
+                    style={{ flex: 1 }}
+                  />
+                  <TouchableOpacity onPress={() => setShowApplyModal(false)} style={[styles.cancelBtn, { backgroundColor: colors.backgroundElement, borderColor: colors.border }]}> 
+                    <ThemedText style={{ color: colors.textSecondary }}>Cancel</ThemedText>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </KeyboardAvoidingView>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
       {/* Floating Back Button (Blur variant) */}
       <Animated.View style={[styles.floatingBack, { opacity: Animated.subtract(1, headerOpacity) }]}>
+
         <TouchableOpacity onPress={() => { haptic.light(); router.back(); }} style={styles.circleBtn}>
           <ThemedView variant="blur" style={StyleSheet.absoluteFill} />
           <Ionicons name="arrow-back" size={24} color={colors.text} />
@@ -514,5 +613,68 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: Spacing.four,
+    maxHeight: '85%',
+  },
+  modalScroll: {
+    paddingBottom: Spacing.four,
+  },
+  formTitle: {
+    marginBottom: Spacing.two,
+  },
+  formField: {
+    marginBottom: Spacing.four,
+  },
+  formLabel: {
+    marginBottom: 8,
+  },
+  textInput: {
+    width: '100%',
+    minHeight: 48,
+    borderWidth: 1,
+    borderRadius: Radius.large,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.three,
+    fontSize: 14,
+  },
+  readOnlyField: {
+    width: '100%',
+    minHeight: 48,
+    borderWidth: 1,
+    borderRadius: Radius.large,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.three,
+    justifyContent: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: Spacing.three,
+    alignItems: 'center',
+  },
+  cancelBtn: {
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.three,
+    borderRadius: Radius.large,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#ef4444',
+    marginTop: -Spacing.two,
+    marginBottom: Spacing.four,
   },
 });
