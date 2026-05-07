@@ -1,9 +1,9 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const Opportunity = require('../models/Opportunity');
-const ClubLeader = require('../models/ClubLeader');
-const User = require('../models/User');
-const IPBlacklist = require('../models/IPBlacklist');
+const Opportunity = require('../../models/Opportunity');
+const ClubLeader = require('../../models/ClubLeader');
+const User = require('../../models/User');
+const IPBlacklist = require('../../models/IPBlacklist');
 const router = express.Router();
 
 // Middleware to verify JWT and check club leader role
