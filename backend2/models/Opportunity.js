@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const opportunitySchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
+  organization_name: String,
   category: String,
   location: String,
   date: Date,
@@ -13,7 +14,12 @@ const opportunitySchema = new mongoose.Schema({
   contact_info: String,
   images: [String],
   tags: [String],
-  status: { type: String, enum: ['active', 'expired', 'cancelled'], default: 'active' },
+  target_departments: [String],
+  min_year: Number,
+  rejection_reason: String,
+  moderated_by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  moderated_at: Date,
+  status: { type: String, enum: ['pending', 'active', 'rejected', 'archived', 'expired', 'cancelled'], default: 'active' },
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   comments: [{
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

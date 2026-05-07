@@ -109,8 +109,34 @@ router.post('/action', verifyClubLeader, async (req, res) => {
         break;
 
       case 'resubmit':
-        await Opportunity.findByIdAndUpdate(opp_id, { status: 'pending', rejection_reason: null });
-        res.json({ success: true, message: 'Post resubmitted for approval.' });
+        if (opportunity.status !== 'rejected') {
+          return res.status(403).json({ success: false, message: 'Only rejected posts can be resubmitted.' });
+        }
+
+        const {
+          title,
+          organization_name,
+          description,
+          deadline,
+          target_departments,
+          min_year,
+        } = req.body;
+
+        await Opportunity.findByIdAndUpdate(
+          opp_id,
+          {
+            title: title ?? opportunity.title,
+            organization_name: organization_name ?? opportunity.organization_name,
+            description: description ?? opportunity.description,
+            deadline: deadline ?? opportunity.deadline,
+            target_departments: target_departments ?? opportunity.target_departments,
+            min_year: min_year ?? opportunity.min_year,
+            status: 'pending',
+            rejection_reason: null,
+          }
+        );
+
+        res.json({ success: true, message: 'Changes saved and post resubmitted!' });
         break;
 
       default:
