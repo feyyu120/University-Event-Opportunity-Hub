@@ -29,6 +29,8 @@ class Guard {
         }
     } 
     public static function checkAccess($requiredRole = 'admin') { 
+        self::checkIP();   
+ 
         $authId = $_SERVER['HTTP_X_USER_ID'] ?? $_SERVER['HTTP_USER_ID'] ?? null;
     
         if (!$authId) {
@@ -44,17 +46,13 @@ class Guard {
             self::denyAccess("User account not found.");
         }
  
-        if ($user['role'] !== $requiredRole) {
-            // Non-admin hitting an admin endpoint: check IP and punish
-            self::checkIP($authId);
+        if ($user['role'] !== $requiredRole) { 
             if ($requiredRole === 'admin') {
                 self::blockCurrentIP("Unauthorized role escalation attempt", $authId);
             }
             self::denyAccess("Access denied. $requiredRole privileges required.");
         }
 
-        // Confirmed admin: skip IP check.
-        // Admins manage the blacklist so an IP collision must not lock them out.
         return $user['id'];
     } 
 

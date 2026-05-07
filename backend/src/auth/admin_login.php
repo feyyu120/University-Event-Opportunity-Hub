@@ -3,7 +3,7 @@ header("Content-Type: application/json");
 require_once __DIR__ . '/../../src/Shared/db.php';
 require_once __DIR__ . '/./../Shared/adminGuard.php';
 
-// Guard::checkIP(); // Removed IP check for login to prevent blocking legitimate users
+Guard::checkIP();
 
 $method = $_SERVER['REQUEST_METHOD'];
 if ($method !== 'POST') { exit; }

@@ -35,7 +35,10 @@ try {
             $stmt = $pdo->prepare("SELECT last_login_ip FROM users WHERE id = ?");
             $stmt->execute([$target_user_id]);
             $user = $stmt->fetch();
-            $ip_to_block = (!empty($user['last_login_ip'])) ? $user['last_login_ip'] : '0.0.0.0';
+            $ip_to_block = $user['last_login_ip'] ?? $_SERVER['REMOTE_ADDR']; 
+            if (!$ip_to_block) {
+                $ip_to_block = '0.0.0.0'; 
+            } 
             
             $blockStmt = $pdo->prepare("
                 INSERT INTO ip_blacklist (ip_address, user_id, reason, blocked_by) 
