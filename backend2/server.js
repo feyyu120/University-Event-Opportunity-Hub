@@ -9,11 +9,18 @@ const app = express();
 
 // Middleware
 app.use(helmet());
+const envOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+
 const allowedOrigins = [
   'https://university-event-opportunity-hub.onrender.com',
   'http://localhost:3000',
   'http://localhost:3001',
+  'http://localhost:3002',
   'http://localhost:19006', // Expo web (common)
+  ...envOrigins,
 ];
 app.use(cors({
   origin(origin, callback) {

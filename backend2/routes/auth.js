@@ -21,19 +21,35 @@ const checkIP = async (req, res, next) => {
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, full_name, role = 'student' } = req.body;
+    const { email, password, full_name, role = 'student', department, university, year } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'Email already exists' });
     }
-    const user = new User({ email, password_hash: password, full_name, role });
+    const user = new User({
+      email,
+      password_hash: password,
+      full_name,
+      role,
+      department,
+      university,
+      year: year !== undefined && year !== null && year !== '' ? Number(year) : undefined,
+    });
     await user.save();
     const token = signToken(user);
     res.json({
       success: true,
       message: 'User registered successfully',
       token,
-      user: { id: user._id, email: user.email, full_name: user.full_name, role: user.role }
+      user: {
+        id: user._id,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role,
+        department: user.department,
+        university: user.university,
+        year: user.year,
+      }
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
