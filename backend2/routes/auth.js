@@ -33,7 +33,7 @@ router.post('/register', async (req, res) => {
       role,
       department,
       university,
-      year: year !== undefined && year !== null && year !== '' ? Number(year) : undefined,
+      year,
     });
     await user.save();
     const token = signToken(user);
@@ -68,8 +68,21 @@ router.post('/login', async (req, res) => {
     res.json({
       success: true,
       token,
-      user: { id: user._id, email: user.email, full_name: user.full_name, role: user.role }
+      user: {
+        id: user._id,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role,
+        department: user.department,
+        university: user.university,
+        year: user.year,
+        bio: user.bio,
+        profile_image: user.profile_image,
+      }
     });
+
+
+
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -141,11 +154,19 @@ router.post('/club_member_login', async (req, res) => {
       return res.status(403).json({ success: false, message: 'Access denied. Unknown club leader' });
     }
     const token = signToken(user);
-    res.json({
+
+    return res.json({
       success: true,
-      message: 'Login successful',
       token,
-      user: { id: user._id, email: user.email, full_name: user.full_name, role: user.role },
+      user: {
+        id: user._id,
+        email: user.email,
+        full_name: user.full_name,
+        role: user.role,
+        department: user.department,
+        university: user.university,
+        year: user.year,
+      },
       club: {
         id: clubLeader._id,
         full_name: clubLeader.club_name,
@@ -155,8 +176,9 @@ router.post('/club_member_login', async (req, res) => {
         department: user.department ?? '',
         posts_count: clubLeader.posts_count ?? 0,
         is_verified: !!clubLeader.is_verified,
-      },
+      }
     });
+
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error: ' + error.message });
   }
