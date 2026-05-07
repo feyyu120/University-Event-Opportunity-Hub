@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
   full_name: { type: String, required: true },
   role: { type: String, enum: ['student', 'club_leader', 'admin', 'banned'], default: 'student' },
   department: String,
-  year: Number,
+  year: String,
   university: String,
   university_id: mongoose.Schema.Types.ObjectId,
   bio: String,
@@ -23,13 +23,13 @@ const userSchema = new mongoose.Schema({
   }]
 }, { timestamps: true });
 
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password_hash')) return next();
   this.password_hash = await bcrypt.hash(this.password_hash, 12);
   next();
 });
 
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password_hash);
 };
 
