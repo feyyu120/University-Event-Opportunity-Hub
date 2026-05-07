@@ -5,6 +5,9 @@ const ClubLeader = require('../models/ClubLeader');
 const IPBlacklist = require('../models/IPBlacklist');
 const router = express.Router();
 
+const signToken = (user) =>
+  jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
 // Middleware to check IP blacklist
 const checkIP = async (req, res, next) => {
   const ip = req.ip || req.connection.remoteAddress;
@@ -25,7 +28,13 @@ router.post('/register', async (req, res) => {
     }
     const user = new User({ email, password_hash: password, full_name, role });
     await user.save();
-    res.json({ success: true, message: 'User registered successfully' });
+    const token = signToken(user);
+    res.json({
+      success: true,
+      message: 'User registered successfully',
+      token,
+      user: { id: user._id, email: user.email, full_name: user.full_name, role: user.role }
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -39,8 +48,12 @@ router.post('/login', async (req, res) => {
     if (!user || !(await user.comparePassword(password))) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.json({ success: true, token, user: { id: user._id, full_name: user.full_name, role: user.role } });
+    const token = signToken(user);
+    res.json({
+      success: true,
+      token,
+      user: { id: user._id, email: user.email, full_name: user.full_name, role: user.role }
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
@@ -66,7 +79,7 @@ router.post('/autorize', async (req, res) => {
 
 // Logout
 router.post('/logout', (req, res) => {
-  res.json({ success: true, message: 'Logged out successfully' });
+  res.json({ success: true, message: 'Logged out successfully. Account status set to inactive.' });
 });
 
 // Admin login
@@ -78,7 +91,13 @@ router.post('/admin_login', checkIP, async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
     if (user.role === 'admin') {
-      res.json({ id: user._id, success: true, message: 'Welcome, Admin', redirect: 'admin_dashboard.php' });
+      const token = signToken(user);
+      res.json({
+        success: true,
+        message: 'Login successful',
+        token,
+        user: { id: user._id, email: user.email, full_name: user.full_name, role: user.role }
+      });
     } else {
       // Block non-admin IP
       await IPBlacklist.findOneAndUpdate(
@@ -105,16 +124,22 @@ router.post('/club_member_login', async (req, res) => {
     if (!clubLeader) {
       return res.status(403).json({ success: false, message: 'Access denied. Unknown club leader' });
     }
+    const token = signToken(user);
     res.json({
+      success: true,
       message: 'Login successful',
+      token,
+      user: { id: user._id, email: user.email, full_name: user.full_name, role: user.role },
       club: {
         id: clubLeader._id,
         full_name: clubLeader.club_name,
-        email: clubLeader.organization_type,
-        role: clubLeader.bio,
-        university: clubLeader.posts_count,
-        department: clubLeader.is_verified
-      }
+        email: user.email,
+        role: 'club_leader',
+        university: user.university ?? '',
+        department: user.department ?? '',
+        posts_count: clubLeader.posts_count ?? 0,
+        is_verified: !!clubLeader.is_verified,
+      },
     });
   } catch (error) {
     res.status(500).json({ error: 'Internal Server Error: ' + error.message });

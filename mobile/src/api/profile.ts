@@ -35,8 +35,8 @@ export interface UpdateProfilePayload {
 
 export const profileApi = {
   get: () =>
-    apiClient.get<UserProfile>('profile/get.php'),
+    apiClient.get<UserProfile>('users/me'),
 
   update: (payload: UpdateProfilePayload) =>
-    apiClient.put<{ message: string; user: UserProfile }>('profile/update.php', payload),
+    apiClient.put<{ success: boolean; user: UserProfile }>('users/me', payload),
 };

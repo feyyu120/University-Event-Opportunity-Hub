@@ -1,8 +1,8 @@
 /**
- * Auth API — Matches the existing PHP backend endpoints:
- *   POST /auth/login.php    { email, password }  → { message, user }
- *   POST /auth/register.php { ... }              → { message, user }
- *   POST /auth/logout.php                        → { message }
+ * Auth API — backend2 (Express) endpoints:
+ *   POST /auth/login        { email, password }                  → { success, token, user }
+ *   POST /auth/register     { email, password, full_name, role } → { success, token, user }
+ *   POST /auth/logout                                           → { success, message }
  */
 
 import { apiClient } from './client';
@@ -10,14 +10,13 @@ import { apiClient } from './client';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface AuthUser {
-  id: number;
+  id: string;
   full_name: string;
   email: string;
   role: string;
-  university: string;
-  department: string;
-  year: string;
-  created_at: string;
+  university?: string;
+  department?: string;
+  year?: string;
   bio?: string;
   profile_image?: string;
 }
@@ -31,16 +30,14 @@ export interface RegisterPayload {
   full_name: string;
   email: string;
   password: string;
-  university?: string;
-  university_id?: number;
-  department?: string;
-  year?: string;
+  role?: string;
 }
 
 export interface AuthResponse {
+  success: boolean;
   message: string;
   user: AuthUser;
-  token?: string; // Include if backend adds JWT later
+  token: string;
 }
 
 // ─── Endpoints ────────────────────────────────────────────────────────────────
@@ -53,8 +50,5 @@ export const authApi = {
     apiClient.post<AuthResponse>('auth/register', payload),
 
   logout: () =>
-    apiClient.post<{ message: string }>('auth/logout', {}),
-
-  checkAuthorization: () =>
-    apiClient.get<{ authorized: boolean; user?: AuthUser }>('auth/autorize'),
+    apiClient.post<{ success: boolean; message: string }>('auth/logout', {}),
 };

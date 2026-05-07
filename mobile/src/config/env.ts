@@ -5,9 +5,17 @@
  * the emulator/device can't reach localhost on the host machine.
  */
 
-// Expo tunnel / ngrok / LAN IP — change this per environment
-const DEV_API_URL = 'https://astu-event-center-backend.onrender.com';
-const PROD_API_URL = 'https://astu-event-center-backend.onrender.com';
+// You can override at runtime with EXPO_PUBLIC_API_BASE_URL
+// Examples:
+// - Android emulator: http://10.0.2.2:5000
+// - iOS simulator:   http://localhost:5000
+// - Physical device: http://<YOUR_LAN_IP>:5000
+const OVERRIDE = process.env.EXPO_PUBLIC_API_BASE_URL;
+
+// Default to the deployed backend so Expo Go (physical phone) works out of the box.
+// If you want local dev, set EXPO_PUBLIC_API_BASE_URL as described above.
+const DEV_API_URL = OVERRIDE || 'https://university-event-opportunity-hub.onrender.com';
+const PROD_API_URL = OVERRIDE || 'https://university-event-opportunity-hub.onrender.com';
 
 export const ENV = {
   API_BASE_URL: __DEV__ ? DEV_API_URL : PROD_API_URL,

@@ -96,8 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (payload: LoginPayload) => {
     try {
       const res = await authApi.login(payload);
-      const token = res.token ?? 'session_token';
-      await persistSession(res.user, token);
+      await persistSession(res.user, res.token);
     } catch (apiErr) {
       throw apiErr;
     }
@@ -106,8 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (payload: RegisterPayload) => {
     try {
       const res = await authApi.register(payload);
-      const token = res.token ?? 'session_token';
-      await persistSession(res.user, token);
+      await persistSession(res.user, res.token);
     } catch (apiErr) {
       throw apiErr;
     }

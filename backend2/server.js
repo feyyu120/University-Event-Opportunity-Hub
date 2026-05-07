@@ -9,9 +9,24 @@ const app = express();
 
 // Middleware
 app.use(helmet());
+const allowedOrigins = [
+  'https://university-event-opportunity-hub.onrender.com',
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:19006', // Expo web (common)
+];
 app.use(cors({
-  origin: ['https://university-event-opportunity-hub.onrender.com', 'http://localhost:3000'],
-  credentials: true
+  origin(origin, callback) {
+    // Allow non-browser clients (no Origin) like mobile apps / curl
+    if (!origin) return callback(null, true);
+    // Allow any localhost port during dev
+    if (process.env.NODE_ENV !== 'production' && /^http:\/\/localhost:\d+$/.test(origin)) {
+      return callback(null, true);
+    }
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error(`CORS blocked origin: ${origin}`));
+  },
+  credentials: true,
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

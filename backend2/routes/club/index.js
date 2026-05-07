@@ -143,4 +143,25 @@ router.get('/notification', verifyClubLeader, async (req, res) => {
   }
 });
 
+// Compatibility: GET /club/stats (alias of /notification, different shape)
+router.get('/stats', verifyClubLeader, async (req, res) => {
+  try {
+    const totalPosts = await Opportunity.countDocuments({ club_id: req.clubLeader._id });
+    const pendingPosts = await Opportunity.countDocuments({ club_id: req.clubLeader._id, status: 'pending' });
+    const approvedPosts = await Opportunity.countDocuments({ club_id: req.clubLeader._id, status: 'active' });
+    const rejectedPosts = await Opportunity.countDocuments({ club_id: req.clubLeader._id, status: 'rejected' });
+
+    res.json({
+      totalOpportunities: totalPosts,
+      activeOpportunities: approvedPosts,
+      totalViews: 0,
+      totalApplications: 0,
+      pendingOpportunities: pendingPosts,
+      rejectedOpportunities: rejectedPosts,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
